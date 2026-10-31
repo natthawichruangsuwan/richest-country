@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: richest-country
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /healthz
+    envVars:
+      - key: MIN_AMOUNT
+        value: "2"
+      - key: CONTACT_EMAIL
+        sync: false

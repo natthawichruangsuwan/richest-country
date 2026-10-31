@@ -1,0 +1,39 @@
+<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ประเทศที่รวยที่สุดในโลก</title>
+<style>*{box-sizing:border-box}body{margin:0;font-family:system-ui,sans-serif;background:linear-gradient(160deg,#1a0b2e,#3b1d60);color:#fff;min-height:100vh}
+.w{max-width:560px;margin:auto;padding:16px}h1{text-align:center;font-size:26px;margin:8px 0;background:linear-gradient(90deg,#ffd700,#ffb347);-webkit-background-clip:text;color:transparent}
+.card{background:#ffffff14;border-radius:16px;padding:14px;margin:12px 0}input,select,button{width:100%;padding:12px;border-radius:10px;border:0;font-size:16px;margin:4px 0}
+button{background:linear-gradient(90deg,#ffd700,#ff9a00);font-weight:700;cursor:pointer}.demo{background:#ff4d6d;text-align:center;padding:6px;border-radius:8px;font-size:13px}
+.pod{display:flex;align-items:flex-end;gap:8px;text-align:center}.pod div{flex:1;background:#ffffff22;border-radius:12px 12px 0 0;padding:8px;cursor:pointer}
+.f{font-size:36px}.row{display:flex;gap:10px;align-items:center;padding:10px;border-bottom:1px solid #ffffff1a;cursor:pointer}.row:hover{background:#ffffff11}
+.g{color:#ffd700;font-weight:700;margin-left:auto;text-align:right}.s{font-size:12px;opacity:.7}.top{background:linear-gradient(90deg,#ffd70044,transparent);border-radius:10px}
+.lang{float:right;width:auto;padding:6px 10px}</style></head><body><div class="w">
+<button class="lang" onclick="L=L=='th'?'en':'th';render()">TH/EN</button><h1 id="t"></h1><div id="demo"></div><div class="card" style="text-align:center"><div style="font-size:15px;line-height:1.5" id="hero"></div></div><div id="main"></div><footer style="text-align:center;font-size:12px;opacity:.8;padding:20px 0"><a style="color:#ffd700" href="/terms">Terms</a> · <a style="color:#ffd700" href="/privacy">Privacy</a> · <a style="color:#ffd700" href="/refund">Refund Policy</a><br><span id="ft"></span><br>© 2026 Richest Country</footer></div>
+<script>let EM='';function heroT(){document.getElementById('hero').innerHTML=L=='th'?'แข่งกันดันประเทศของคุณขึ้นอันดับ 1! เลือกประเทศ ร่วมสนับสนุนเว็บตั้งแต่ $'+MINV+' แล้วยอดจะถูกนับให้ประเทศนั้น<br><span class=s>การสนับสนุนเป็นแบบสมัครใจ ไม่ได้รับสินค้า บริการ หรือผลตอบแทนใดๆ และไม่ใช่การลงทุนหรือการพนัน</span>':'Push your country to #1! Pick a country and support this site from $'+MINV+' — your contribution counts toward its total.<br><span class=s>Contributions are voluntary. You receive no goods, services or returns of any kind. This is not an investment, lottery or gambling.</span>';document.getElementById('ft').textContent='Contact: '+(EM||'')}
+const CODES="AF AX AL DZ AS AD AO AI AG AR AM AW AU AT AZ BS BH BD BB BY BE BZ BJ BM BT BO BA BW BR IO BN BG BF BI KH CM CA CV KY CF TD CL CN CO KM CG CD CK CR CI HR CU CW CY CZ DK DJ DM DO EC EG SV GQ ER EE SZ ET FK FO FJ FI FR GF PF GA GM GE DE GH GI GR GL GD GP GU GT GG GN GW GY HT VA HN HK HU IS IN ID IR IQ IE IM IL IT JM JP JE JO KZ KE KI KP KR XK KW KG LA LV LB LS LR LY LI LT LU MO MG MW MY MV ML MT MH MQ MR MU YT MX FM MD MC MN ME MS MA MZ MM NA NR NP NL NC NZ NI NE NG NU MK MP NO OM PK PW PS PA PG PY PE PH PN PL PT PR QA RE RO RU RW BL SH KN LC MF PM VC WS SM ST SA SN RS SC SL SG SX SK SI SB SO ZA SS ES LK SD SR SE CH SY TW TJ TZ TH TL TG TO TT TN TR TM TC TV UG UA AE GB US UY UZ VU VE VN VG VI WF EH YE ZM ZW".split(' ');
+let MINV=2;let L='th',D={rows:[],recent:[]},view=location.hash.slice(1),DEMO=false;
+const T={th:{t:'👑 ประเทศที่รวยที่สุดในโลก',pick:'เลือกประเทศ',amt:'จำนวนเงิน (ขั้นต่ำ $'+MINV+')',name:'ชื่อที่แสดง (ไม่บังคับ)',go:'เติมเงินให้ประเทศ!',lb:'🏆 อันดับประเทศ',search:'ค้นหาประเทศ...',rec:'⚡ ล่าสุด',ppl:'คน',back:'← กลับ',donors:'👑 คนที่รวยที่สุดในประเทศ',demo:'โหมดทดลอง — ไม่มีการเก็บเงินจริง',none:'ยังไม่มีใคร',ok:'ขอบคุณ!'},
+en:{t:'👑 The Richest Country in the World',pick:'Pick a country',amt:'Amount (min $'+MINV+')',name:'Display name (optional)',go:'Fund your country!',lb:'🏆 Leaderboard',search:'Search country...',rec:'⚡ Recent',ppl:'donors',back:'← Back',donors:'👑 Richest people of this country',demo:'DEMO MODE — no real money is charged',none:'No one yet',ok:'Thank you!'}};
+const nm=c=>new Intl.DisplayNames([L],{type:'region'}).of(c),fl=c=>String.fromCodePoint(...[...c].map(x=>127397+x.charCodeAt())),
+$=n=>'$'+(n/100).toLocaleString(undefined,{minimumFractionDigits:2}),tm=t=>new Date(t).toLocaleString(L=='th'?'th-TH':'en-US'),
+esc=s=>s.replace(/[&<>"]/g,c=>'&#'+c.charCodeAt()+';');let q='';
+async function load(){D=await(await fetch('/api/leaderboard')).json();if(view)D.donors=(await(await fetch('/api/country/'+view)).json()).donors;render()}
+function go(c){location.hash=c||'';}onhashchange=()=>{view=location.hash.slice(1);load()};
+function render(){const t=T[L];heroT();document.getElementById('t').textContent=t.t;document.getElementById('demo').innerHTML=DEMO?`<div class="demo">${t.demo}</div>`:'';
+const r=D.rows,M=document.getElementById('main');
+if(view){const d=D.donors||[],row=r.find(x=>x.c==view)||{cents:0,n:0};M.innerHTML=`<button onclick="go()">${t.back}</button>
+<div class="card" style="text-align:center"><div class="f" style="font-size:64px">${fl(view)}</div><h2>${nm(view)}</h2><div class="g" style="margin:0;font-size:24px;text-align:center">${$(row.cents)}</div></div>
+<div class="card"><h3>${t.donors}</h3>${d.map((x,i)=>`<div class="row ${i?'':'top'}"><b>${i?'#'+(i+1):'👑'}</b><div>${esc(x.name)}<div class="s">${tm(x.t)} · ×${x.n}</div></div><div class="g">${$(x.cents)}</div></div>`).join('')||t.none}</div>`+form(view);return}
+const p=[r[1],r[0],r[2]],h=[90,130,70],md=['🥈','🥇','🥉'];
+M.innerHTML=form()+`<div class="card"><h3>${t.lb}</h3><div class="pod">${p.map((x,i)=>x?`<div style="height:${h[i]+60}px" onclick="go('${x.c}')">${md[i]}<div class="f">${fl(x.c)}</div><div class="s">${nm(x.c)}</div><b>${$(x.cents)}</b></div>`:'<div style="opacity:0"></div>').join('')}</div>
+<input placeholder="${t.search}" value="${q}" oninput="q=this.value;list()"><div id="list"></div></div>
+<div class="card"><h3>${t.rec}</h3>${D.recent.map(x=>`<div class="row" onclick="go('${x.c}')">${fl(x.c)} <div>${esc(x.name)}<div class="s">${tm(x.t)}</div></div><div class="g">+${$(x.cents)}</div></div>`).join('')||t.none}</div>`;list()}
+function list(){const t=T[L],e=document.getElementById('list');if(!e)return;e.innerHTML=D.rows.map((x,i)=>[x,i]).filter(([x])=>nm(x.c).toLowerCase().includes(q.toLowerCase())||x.c.includes(q.toUpperCase()))
+.map(([x,i])=>`<div class="row" onclick="go('${x.c}')"><b>#${i+1}</b><span class="f" style="font-size:24px">${fl(x.c)}</span><div>${nm(x.c)}<div class="s">${x.n} ${t.ppl}</div></div><div class="g">${$(x.cents)}</div></div>`).join('')||t.none}
+function form(sel){const t=T[L],o=CODES.map(c=>[c,nm(c)]).sort((a,b)=>a[1].localeCompare(b[1],L));sel=sel||localStorage.c||'TH';
+return `<div class="card"><select id="c">${o.map(([c,n])=>`<option value="${c}" ${c==sel?'selected':''}>${fl(c)} ${n}</option>`).join('')}</select>
+<input id="a" type="number" min="${MINV}" step="1" value="${MINV}" placeholder="${t.amt}"><input id="n" maxlength="30" placeholder="${t.name}"><button onclick="pay()">${t.go}</button></div>`}
+async function pay(){const c=document.getElementById('c').value,a=+document.getElementById('a').value;if(!(a>=MINV))return alert(T[L].amt);localStorage.c=c;
+const r=await(await fetch('/api/contribute',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({country:c,amount:a,name:document.getElementById('n').value})})).json();
+if(r.url)location=r.url;else if(r.error)alert(r.error);else{alert(T[L].ok);load()}}
+fetch('/api/config').then(r=>r.json()).then(c=>{DEMO=c.demo;MINV=c.min;EM=c.email;render();load()});setInterval(load,5000);
+</script></body></html>
