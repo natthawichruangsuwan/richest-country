@@ -10,10 +10,10 @@ const clean=(m,n)=>String(m||'').replace(/[\u0000-\u001f\u007f<>]/g,' ').replace
 const cleanLink=u=>{u=String(u||'').trim();if(!u||u.length>200||/[\s<>"'`\u0000-\u001f\u007f]/.test(u))return null;try{const x=new URL(u);if(!/^https?:$/.test(x.protocol)||!x.hostname.includes('.')||x.username||x.password)return null;return x.href.length<=200?x.href:null}catch(e){return null}};
 async function credit(c,cents,name,id,msg,link){name=clean(name,30)||'Anonymous';msg=clean(msg,80)||null;cents=Math.trunc(cents);link=cents>=2000?cleanLink(link):null;
  if(pool){await pool.query('INSERT INTO contributions(country,name,amount_cents,payment_id,message,link) VALUES($1,$2,$3,$4,$5,$6) ON CONFLICT (payment_id) DO NOTHING',[c,name,cents,id||null,msg,link]);return;}
- if(id&&db.seen[id])return;if(id)db.seen[id]=1;db.contribs.push({c,cents,name,msg,link,t:Date.now()});save();}
-async function all(c){if(pool){const r=await pool.query("SELECT country c,name,amount_cents cents,(extract(epoch from created_at)*1000)::bigint t,message msg,link FROM contributions"+(c?" WHERE country=$1":"")+" ORDER BY id",c?[c]:[]);
-  return r.rows.map(x=>({c:x.c,name:x.name,cents:x.cents,t:+x.t,msg:x.msg||null,link:x.link||null}));}
- return c?db.contribs.filter(x=>x.c===c):db.contribs;}
+ if(id&&db.seen[id])return;if(id)db.seen[id]=1;db.contribs.push({c,cents,name,msg,link,t:Date.now(),...(id?{pid:id}:{})});save();}
+async function all(c){if(pool){const r=await pool.query("SELECT country c,name,amount_cents cents,(extract(epoch from created_at)*1000)::bigint t,message msg,link,(payment_id IS NOT NULL AND payment_id LIKE 'seed\\_%') demo FROM contributions"+(c?" WHERE country=$1":"")+" ORDER BY id",c?[c]:[]);
+  return r.rows.map(x=>({c:x.c,name:x.name,cents:x.cents,t:+x.t,msg:x.msg||null,link:x.link||null,demo:!!x.demo}));}
+ return (c?db.contribs.filter(x=>x.c===c):db.contribs).map(({pid,...x})=>({...x,demo:typeof pid==='string'&&pid.startsWith('seed_')}));}
 app.post('/webhook',express.raw({type:'*/*'}),async(req,res)=>{
  try{if(WH){const sig=req.headers['stripe-signature']||'';const p=Object.fromEntries(sig.split(',').map(x=>x.split('=')));
   const exp=crypto.createHmac('sha256',WH).update(p.t+'.'+req.body).digest('hex');
@@ -24,13 +24,13 @@ app.post('/webhook',express.raw({type:'*/*'}),async(req,res)=>{
   res.json({ok:1});}catch(e){res.status(400).send('err')}});
 app.use(express.json());app.use(express.static(path.join(__dirname,'public')));
 const valid=c=>/^[A-Z]{2}$/.test(c);
-app.get('/api/config',(q,r)=>r.json({demo:!KEY,min:MIN,email:EMAIL}));
-function agg(L){const m={};for(const x of L){const k=x.c+'|'+x.name;m[k]??={c:x.c,name:x.name,cents:0,n:0,t:0};const d=m[k];d.cents+=x.cents;d.n++;
+app.get('/api/config',async(q,r)=>{let notice=false;if(process.env.SHOW_DEMO_NOTICE!=='false'){try{notice=(await all()).some(x=>x.demo)}catch(e){}}r.json({demo:!KEY,min:MIN,email:EMAIL,demoNotice:notice})});
+function agg(L){const m={};for(const x of L){const k=x.c+'|'+x.name;m[k]??={c:x.c,name:x.name,cents:0,n:0,t:0,demo:true};const d=m[k];d.demo=d.demo&&x.demo;d.cents+=x.cents;d.n++;
  if(x.t>=d.t&&x.msg)d.msg=x.msg;if(x.link&&x.cents>=2000&&x.t>=(d.lt||0)){d.link=x.link;d.lt=x.t}d.t=Math.max(d.t,x.t);}
  return Object.values(m).map(({lt,...d})=>d).sort((a,b)=>b.cents-a.cents||a.t-b.t)}
 const topOf=A=>A[0]?{c:A[0].c,name:A[0].name}:null;
 app.get('/api/hall',async(q,r)=>{try{const A=agg(await all());r.json({top:topOf(A),hall:A.slice(0,10)});}catch(e){console.error(e.message);r.status(500).json({error:'db'})}});
-app.get('/api/leaderboard',async(q,r)=>{try{const L=await all();const m={};for(const x of L){m[x.c]??={c:x.c,cents:0,n:0};m[x.c].cents+=x.cents;m[x.c].n++;}
+app.get('/api/leaderboard',async(q,r)=>{try{const L=await all();const m={};for(const x of L){m[x.c]??={c:x.c,cents:0,n:0,demo:true};m[x.c].demo=m[x.c].demo&&x.demo;m[x.c].cents+=x.cents;m[x.c].n++;}
  const A=agg(L),lk={};for(const d of A)if(d.link)lk[d.c+'|'+d.name]=d.link;
  r.json({rows:Object.values(m).sort((a,b)=>b.cents-a.cents),top:topOf(A),recent:L.slice(-15).reverse().map(({link,...x})=>({...x,link:lk[x.c+'|'+x.name]||null}))});}catch(e){console.error(e.message);r.status(500).json({error:'db'})}});
 app.get('/api/country/:c',async(q,r)=>{try{const c=q.params.c.toUpperCase();if(!valid(c))return r.status(400).json({error:'bad country'});const A=agg(await all());
