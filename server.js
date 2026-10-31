@@ -7,7 +7,7 @@ if(PG){const{Pool}=require('pg');pool=new Pool({connectionString:PG,max:5});
 else db=fs.existsSync(DB)?JSON.parse(fs.readFileSync(DB)):{contribs:[],seen:{}};
 const save=()=>fs.writeFileSync(DB,JSON.stringify(db));
 const clean=(m,n)=>String(m||'').replace(/[\u0000-\u001f\u007f<>]/g,' ').replace(/\s+/g,' ').trim().slice(0,n);
-const AVT={free1:0,free2:0,free3:0,free4:0,tier20_1:2000,tier20_2:2000,tier100_1:10000,tier100_2:10000};
+const AVT={free1:0,free2:0,free3:0,free4:0,tier20_1:2000,tier20_2:2000,tier100_1:10000,tier100_2:10000,tier500_1:50000};
 const cleanAv=(a,cents)=>{a=String(a||'');return Object.prototype.hasOwnProperty.call(AVT,a)&&cents>=AVT[a]?a:null};
 const cleanLink=u=>{u=String(u||'').trim();if(!u||u.length>200||/[\s<>"'`\u0000-\u001f\u007f]/.test(u))return null;try{const x=new URL(u);if(!/^https?:$/.test(x.protocol)||!x.hostname.includes('.')||x.username||x.password)return null;return x.href.length<=200?x.href:null}catch(e){return null}};
 async function credit(c,cents,name,id,msg,link,av){name=clean(name,30)||'Anonymous';msg=clean(msg,80)||null;cents=Math.trunc(cents);link=cents>=2000?cleanLink(link):null;av=cleanAv(av,cents);
