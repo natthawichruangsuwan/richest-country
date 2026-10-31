@@ -22,13 +22,13 @@ app.get('/api/country/:c',(q,r)=>{const c=q.params.c.toUpperCase();const m={};
  for(const x of db.contribs.filter(x=>x.c===c)){const k=x.name;m[k]??={name:k,cents:0,n:0,t:0};m[k].cents+=x.cents;m[k].n++;m[k].t=Math.max(m[k].t,x.t);}
  r.json({donors:Object.values(m).sort((a,b)=>b.cents-a.cents)});});
 app.post('/api/contribute',async(q,r)=>{const{country:c,amount,name}=q.body;const cents=Math.round(+amount*100);
- if(!valid(c)||!(cents>=Math.round(MIN*100))||cents>99999900)return r.status(400).json({error:'min $'+MIN});
+ if(!valid(c)||!(cents>=Math.round(MIN*100))||cents>99999900)return r.status(400).json({error:'The minimum contribution is $'+MIN+'.'});
  if(!KEY){credit(c,cents,name);return r.json({demo:true});}
  const f=new URLSearchParams({mode:'payment',success_url:BASE+'/?paid=1',cancel_url:BASE+'/',
   'line_items[0][quantity]':'1','line_items[0][price_data][currency]':'usd','line_items[0][price_data][unit_amount]':String(cents),
   'line_items[0][price_data][product_data][name]':'Contribution for '+c,'metadata[country]':c,'metadata[name]':(name||'').slice(0,30)});
  const s=await(await fetch('https://api.stripe.com/v1/checkout/sessions',{method:'POST',headers:{Authorization:'Bearer '+KEY},body:f})).json();
- if(!s.url)return r.status(500).json({error:s.error?.message||'stripe'});r.json({url:s.url});});
+ if(!s.url)return r.status(500).json({error:s.error?.message||'Payment could not be started. Please try again.'});r.json({url:s.url});});
 app.get('/healthz',(q,r)=>r.send('ok'));
 for(const p of['terms','privacy','refund'])app.get('/'+p,(q,r)=>r.sendFile(path.join(__dirname,'public',p+'.html')));
 app.listen(PORT,()=>console.log('on',PORT,KEY?'LIVE':'DEMO'));
