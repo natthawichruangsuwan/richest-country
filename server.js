@@ -27,14 +27,15 @@ app.post('/webhook',express.raw({type:'*/*'}),async(req,res)=>{
 app.use(express.json());app.use(express.static(path.join(__dirname,'public')));
 const valid=c=>/^[A-Z]{2}$/.test(c);
 app.get('/api/config',async(q,r)=>{let notice=false;if(process.env.SHOW_DEMO_NOTICE!=='false'){try{notice=(await all()).some(x=>x.demo)}catch(e){}}r.json({demo:!KEY,min:MIN,email:EMAIL,demoNotice:notice})});
-function agg(L){const m={};for(const x of L){const k=x.c+'|'+x.name;m[k]??={c:x.c,name:x.name,cents:0,n:0,t:0,demo:true};const d=m[k];d.demo=d.demo&&x.demo;d.cents+=x.cents;d.n++;
- if(x.t>=d.t&&x.msg)d.msg=x.msg;if(x.link&&x.cents>=2000&&x.t>=(d.lt||0)){d.link=x.link;d.lt=x.t}if(x.av&&x.t>=(d.at||0)){d.av=x.av;d.at=x.t}d.t=Math.max(d.t,x.t);}
- return Object.values(m).map(({lt,at,...d})=>({...d,av:d.av||null})).sort((a,b)=>b.cents-a.cents||a.t-b.t)}
+const dk=(x,i)=>{const n=String(x.name||'').trim().toLowerCase();return n?x.c+'|'+n:'#'+i};
+function agg(L){const m={};L.forEach((x,i)=>{const k=dk(x,i);m[k]??={k,c:x.c,name:x.name,cents:0,n:0,t:0,demo:true};const d=m[k];d.demo=d.demo&&x.demo;d.cents+=x.cents;d.n++;
+ if(x.t>=d.t&&x.msg)d.msg=x.msg;if(x.link&&x.cents>=2000&&x.t>=(d.lt||0)){d.link=x.link;d.lt=x.t}if(x.av&&x.t>=(d.at||0)){d.av=x.av;d.at=x.t}d.t=Math.max(d.t,x.t);});
+ return Object.values(m).map(({lt,at,k,...d})=>({...d,av:d.av||null})).sort((a,b)=>b.cents-a.cents||a.t-b.t)}
 const topOf=A=>A[0]?{c:A[0].c,name:A[0].name,av:A[0].av||null}:null;
 app.get('/api/hall',async(q,r)=>{try{const A=agg(await all());r.json({top:topOf(A),hall:A.slice(0,10)});}catch(e){console.error(e.message);r.status(500).json({error:'db'})}});
 app.get('/api/leaderboard',async(q,r)=>{try{const L=await all();const m={};for(const x of L){m[x.c]??={c:x.c,cents:0,n:0,demo:true};m[x.c].demo=m[x.c].demo&&x.demo;m[x.c].cents+=x.cents;m[x.c].n++;}
- const A=agg(L),lk={},ak={};for(const d of A){if(d.link)lk[d.c+'|'+d.name]=d.link;if(d.av)ak[d.c+'|'+d.name]=d.av}
- r.json({rows:Object.values(m).sort((a,b)=>b.cents-a.cents),top:topOf(A),recent:L.slice(-15).reverse().map(({link,av,...x})=>({...x,link:lk[x.c+'|'+x.name]||null,av:ak[x.c+'|'+x.name]||null}))});}catch(e){console.error(e.message);r.status(500).json({error:'db'})}});
+ const A=agg(L),lk={},ak={};for(const d of A){const k=dk(d,-1);if(d.link)lk[k]=d.link;if(d.av)ak[k]=d.av}
+ r.json({rows:Object.values(m).sort((a,b)=>b.cents-a.cents),top:topOf(A),recent:L.slice(-15).reverse().map(({link,av,...x})=>{const k=dk(x,-2);return{...x,link:lk[k]||null,av:ak[k]||(k[0]=='#'?av:null)||null}})});}catch(e){console.error(e.message);r.status(500).json({error:'db'})}});
 app.get('/api/country/:c',async(q,r)=>{try{const c=q.params.c.toUpperCase();if(!valid(c))return r.status(400).json({error:'bad country'});const A=agg(await all());
  r.json({top:topOf(A),donors:A.filter(x=>x.c===c)});}catch(e){console.error(e.message);r.status(500).json({error:'db'})}});
 app.post('/api/contribute',async(q,r)=>{const{country:c,amount,name,message,link,avatar}=q.body;const cents=Math.round(+amount*100);
