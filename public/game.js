@@ -19,7 +19,7 @@ const css=`#fr{user-select:none;-webkit-user-select:none;-webkit-touch-callout:n
 const st=document.createElement('style');st.textContent=css;document.head.appendChild(st);
 const lid=localStorage.gid||(localStorage.gid=Array.from(crypto.getRandomValues(new Uint8Array(12)),b=>b.toString(16).padStart(2,'0')).join(''));
 const flag=(c,w)=>`https://flagcdn.com/w${w}/${c.toLowerCase()}.png`,N=c=>{try{return nm(c)}catch(e){return c}},F=n=>Math.round(n||0).toLocaleString('en-US');
-let S={phase:'idle',c:null,left:null,max:5,taps:0,per:[],t0:0,token:null,res:null,err:''},EL=null,RU={PER_TAP:250,TPS:12,GAME_S:30,WEEK_CAP_PER_COUNTRY:5000000,DAY_CAP_PER_COUNTRY:300000,RUN_CAP:90000,RUNS_PER_DAY:5};
+let S={phase:'idle',c:null,left:null,max:5,taps:0,per:[],t0:0,token:null,res:null,err:''},EL=null,RU={PER_TAP:50,TPS:12,GAME_S:30,WEEK_CAP_PER_COUNTRY:5000000,DAY_CAP_PER_COUNTRY:300000,RUN_CAP:90000,RUNS_PER_DAY:5};
 const $=s=>EL&&EL.querySelector(s);
 // Sound (Web Audio, synthesized; never throws)
 let AC=null,MUTE=localStorage.frMute==='1',combo=0,lastTap=0;
