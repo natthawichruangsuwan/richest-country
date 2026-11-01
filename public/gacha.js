@@ -30,7 +30,7 @@ const ratesH=()=>`<h3>🎁 Lucky Capsule — drop rates</h3><table class="gtbl">
 <p class="s">Every capsule always contains one cosmetic item. Items are decorations only: they have no cash value, cannot be sold or traded, and never change rankings or totals. The free capsule is 1 per day. Tickets are given automatically with contributions ($5 = 1 ticket, max 10 per payment) — you are never paying for a random item. This is just for fun, not gambling or an investment.</p>
 <h4>All items</h4><div class="gcol">${Object.values(CAT).map(x=>`<div class="it" style="cursor:default"><span class="e">${x.emoji}</span><span class="r${x.r}">${RN[x.r]}</span><br>${E(x.label)}</div>`).join('')}</div>`;
 function capH(lbl){return `<h3>${lbl}</h3><div class="gcp" id="gcp"><div class="b"></div><div class="t"></div></div><div id="gres" class="s" style="text-align:center">Opening…</div>`}
-async function openWith(lbl,req){modal(capH(lbl));const cp=document.getElementById('gcp');cp.classList.add('sh');let r;try{r=await req()}catch(e){r={error:'Network error, please try again.'}}
+async function openWith(lbl,req){try{window.frClick&&window.frClick()}catch(_){}modal(capH(lbl));const cp=document.getElementById('gcp');cp.classList.add('sh');let r;try{r=await req()}catch(e){r={error:'Network error, please try again.'}}
  await new Promise(s=>setTimeout(s,matchMedia('(prefers-reduced-motion:reduce)').matches?100:1000));
  if(!r||r.error||!r.item){document.getElementById('gres').textContent=(r&&r.error)||'Something went wrong.';return}
  cp.classList.remove('sh');cp.classList.add('op');const x=r.item,I=inv();I.push({t:r.token,id:x.id});SV('gInv',I);

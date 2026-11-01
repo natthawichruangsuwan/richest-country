@@ -1,6 +1,6 @@
 // Flag Rush: free 30-second tap game. Game points are free, capped, have no cash value, and never require payment.
 const crypto=require('crypto');
-const R={PER_TAP:25,MIN_MS:29000,MAX_MS:40000,GAME_S:30,TPS:12,MAX_TAPS:360,RUNS_PER_DAY:5,DAY_CAP_PER_COUNTRY:30000,WEEK_CAP_PER_COUNTRY:500000};
+const R={PER_TAP:250,MIN_MS:29000,MAX_MS:40000,GAME_S:30,TPS:12,MAX_TAPS:360,RUNS_PER_DAY:5,DAY_CAP_PER_COUNTRY:300000,WEEK_CAP_PER_COUNTRY:5000000};
 R.RUN_CAP=R.MAX_TAPS*R.PER_TAP;
 const MIGRATIONS=['CREATE TABLE IF NOT EXISTS game_runs(id serial PRIMARY KEY,run_id text UNIQUE NOT NULL,country text NOT NULL,taps integer NOT NULL,pts integer NOT NULL,visitor_hash text NOT NULL,created_at timestamptz NOT NULL DEFAULT now())',
  'ALTER TABLE game_runs ADD COLUMN IF NOT EXISTS lid_hash text','CREATE INDEX IF NOT EXISTS game_runs_vh ON game_runs(visitor_hash,created_at)','CREATE INDEX IF NOT EXISTS game_runs_lh ON game_runs(lid_hash,created_at)'];
