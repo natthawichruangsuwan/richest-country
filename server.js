@@ -3,7 +3,7 @@ const app=express(),PORT=process.env.PORT||3000,KEY=process.env.STRIPE_SECRET_KE
 const BASE=process.env.BASE_URL||`http://localhost:${PORT}`,DB=process.env.DATA_FILE||path.join(__dirname,'data.json');
 const PG=process.env.DATABASE_URL;let pool,db;
 if(PG){const{Pool}=require('pg');pool=new Pool({connectionString:PG,max:5});
- pool.query(`CREATE TABLE IF NOT EXISTS contributions(id serial PRIMARY KEY,country text NOT NULL,name text NOT NULL,amount_cents integer NOT NULL CHECK(amount_cents>0),created_at timestamptz NOT NULL DEFAULT now(),payment_id text UNIQUE)`).then(()=>pool.query('ALTER TABLE contributions ADD COLUMN IF NOT EXISTS message text')).then(()=>pool.query('ALTER TABLE contributions ADD COLUMN IF NOT EXISTS link text')).then(()=>pool.query('ALTER TABLE contributions ADD COLUMN IF NOT EXISTS avatar text')).then(async()=>{for(const m of require('./gacha').MIGRATIONS)await pool.query(m)}).then(()=>pool.query('CREATE TABLE IF NOT EXISTS weekly_champions(week_key text PRIMARY KEY,country text NOT NULL,points bigint NOT NULL,finalized_at timestamptz NOT NULL DEFAULT now())')).then(()=>console.log('db ready')).catch(e=>console.error('db init',e.message));}
+ pool.query(`CREATE TABLE IF NOT EXISTS contributions(id serial PRIMARY KEY,country text NOT NULL,name text NOT NULL,amount_cents integer NOT NULL CHECK(amount_cents>0),created_at timestamptz NOT NULL DEFAULT now(),payment_id text UNIQUE)`).then(()=>pool.query('ALTER TABLE contributions ADD COLUMN IF NOT EXISTS message text')).then(()=>pool.query('ALTER TABLE contributions ADD COLUMN IF NOT EXISTS link text')).then(()=>pool.query('ALTER TABLE contributions ADD COLUMN IF NOT EXISTS avatar text')).then(async()=>{for(const m of require('./gacha').MIGRATIONS)await pool.query(m)}).then(()=>pool.query('CREATE TABLE IF NOT EXISTS weekly_champions(week_key text PRIMARY KEY,country text NOT NULL,points bigint NOT NULL,finalized_at timestamptz NOT NULL DEFAULT now())')).then(async()=>{for(const m of require('./game').MIGRATIONS)await pool.query(m)}).then(()=>console.log('db ready')).catch(e=>console.error('db init',e.message));}
 else db=fs.existsSync(DB)?JSON.parse(fs.readFileSync(DB)):{contribs:[],seen:{}};
 const save=()=>fs.writeFileSync(DB,JSON.stringify(db));app.set('trust proxy',1);let GX;
 const clean=(m,n)=>String(m||'').replace(/[\u0000-\u001f\u007f<>]/g,' ').replace(/\s+/g,' ').trim().slice(0,n);
@@ -34,10 +34,11 @@ const WD={Mon:0,Tue:1,Wed:2,Thu:3,Fri:4,Sat:5,Sun:6};
 function weekOf(ms){const p=laParts(ms),dd=new Date(Date.UTC(+p.year,+p.month-1,+p.day-WD[p.weekday]));const y=dd.getUTCFullYear(),m=dd.getUTCMonth()+1,d=dd.getUTCDate();
  const n=new Date(Date.UTC(y,m-1,d+7));return{key:`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`,start:laMid(y,m,d),end:laMid(n.getUTCFullYear(),n.getUTCMonth()+1,n.getUTCDate())}}
 const inScope=(L,q)=>{if(q&&q.query&&q.query.scope==='all')return L;const w=weekOf(Date.now());return L.filter(x=>x.t>=w.start&&x.t<w.end)};
-let CH=[],CHAMP=null;
+let CH=[],CHAMP=null;const GM=require('./game')(app,{pool,db,save,KEY,WH,PG,weekOf});
 function winnerOf(L){const m={};for(const x of [...L].sort((a,b)=>a.t-b.t)){m[x.c]??={c:x.c,pts:0,t:0};m[x.c].pts+=x.pts;m[x.c].t=x.t}return Object.values(m).sort((a,b)=>b.pts-a.pts||a.t-b.t)[0]||null}
 async function finalize(){try{const L=await all(),cur=weekOf(Date.now()),done=new Set(CH.map(x=>x.week)),wk={};
  for(const x of L){const w=weekOf(x.t);if(w.start>=cur.start)continue;(wk[w.key]??={w,L:[]}).L.push(x)}
+ for(const g of await GM.weekly()){if(g.start>=cur.start)continue;(wk[g.week]??={w:weekOf(g.start),L:[]}).L.push({c:g.c,pts:g.pts,t:g.t})}
  if(pool){const r=await pool.query('SELECT week_key,country,points,(extract(epoch from finalized_at)*1000)::bigint f FROM weekly_champions');r.rows.forEach(x=>done.add(x.week_key));
   for(const k in wk)if(!done.has(k)){const v=winnerOf(wk[k].L);if(v)await pool.query('INSERT INTO weekly_champions(week_key,country,points) VALUES($1,$2,$3) ON CONFLICT (week_key) DO NOTHING',[k,v.c,v.pts])}
   CH=(await pool.query('SELECT week_key w,country c,points::bigint p FROM weekly_champions ORDER BY week_key DESC')).rows.map(x=>({week:x.w,c:x.c,pts:+x.p}));}
@@ -48,6 +49,8 @@ setTimeout(finalize,3000);setInterval(finalize,5*60e3);
 const wkInfo=()=>{const w=weekOf(Date.now());return{week:w.key,start:w.start,end:w.end,now:Date.now(),champion:CHAMP}};
 app.get('/api/champions',async(q,r)=>{await finalize();const n={};CH.forEach(x=>{n[x.c]??={c:x.c,titles:0,pts:0,last:x.week};n[x.c].titles++;n[x.c].pts+=x.pts});
  r.json({...wkInfo(),history:CH,table:Object.values(n).sort((a,b)=>b.titles-a.titles||b.pts-a.pts)})});
+async function combined(L,q){const m={};for(const x of L){m[x.c]??={c:x.c,cents:0,pts:0,n:0,demo:true,donPts:0,gamePts:0};m[x.c].demo=m[x.c].demo&&x.demo;m[x.c].cents+=x.cents;m[x.c].donPts+=x.pts;m[x.c].n++;}
+ const G=await GM.byCountry(q&&q.query&&q.query.scope==='all'?'all':'week');for(const c in G){m[c]??={c,cents:0,pts:0,n:0,demo:false,donPts:0,gamePts:0};m[c].gamePts=G[c]}for(const c in m)m[c].pts=m[c].donPts+m[c].gamePts;return m}
 const valid=c=>/^[A-Z]{2}$/.test(c);
 app.get('/api/config',async(q,r)=>{let notice=false;if(process.env.SHOW_DEMO_NOTICE!=='false'){try{notice=(await all()).some(x=>x.demo)}catch(e){}}r.json({demo:!KEY,min:MIN,email:EMAIL,demoNotice:notice})});
 const dk=(x,i)=>{const n=String(x.name||'').trim().toLowerCase();return n?x.c+'|'+n:'#'+i};
@@ -56,11 +59,11 @@ function agg(L){const m={};L.forEach((x,i)=>{const k=dk(x,i);m[k]??={k,c:x.c,nam
  return Object.values(m).map(({lt,at,ct,k,...d})=>({...d,av:d.av||null,cos:d.cos||null})).sort((a,b)=>b.pts-a.pts||a.t-b.t)}
 const topOf=A=>A[0]?{c:A[0].c,name:A[0].name,av:A[0].av||null,cos:A[0].cos||null}:null;
 app.get('/api/hall',async(q,r)=>{try{const A=agg(inScope(await all(),q));r.json({...wkInfo(),scope:q.query.scope==='all'?'all':'week',top:topOf(A),hall:A.slice(0,10)});}catch(e){console.error(e.message);r.status(500).json({error:'db'})}});
-app.get('/api/leaderboard',async(q,r)=>{try{const L=inScope(await all(),q),RA=await all();const m={};for(const x of L){m[x.c]??={c:x.c,cents:0,pts:0,n:0,demo:true};m[x.c].demo=m[x.c].demo&&x.demo;m[x.c].cents+=x.cents;m[x.c].pts+=x.pts;m[x.c].n++;}
+app.get('/api/leaderboard',async(q,r)=>{try{const L=inScope(await all(),q),RA=await all();const m=await combined(L,q);
  const A=agg(L),lk={},ak={},ck={};for(const d of agg(RA)){const k=dk(d,-1);if(d.link)lk[k]=d.link;if(d.av)ak[k]=d.av;if(d.cos)ck[k]=d.cos}
- r.json({...wkInfo(),scope:q.query.scope==='all'?'all':'week',rows:Object.values(m).sort((a,b)=>b.pts-a.pts),top:topOf(A),recent:RA.slice(-15).reverse().map(({link,av,cos,...x})=>{const k=dk(x,-2);return{...x,link:lk[k]||null,av:ak[k]||(k[0]=='#'?av:null)||null,cos:ck[k]||(k[0]=='#'?cos:null)||null}})});}catch(e){console.error(e.message);r.status(500).json({error:'db'})}});
+ r.json({...wkInfo(),scope:q.query.scope==='all'?'all':'week',rows:Object.values(m).sort((a,b)=>b.pts-a.pts),gameRules:{perTap:GM.R.PER_TAP,weekCap:GM.R.WEEK_CAP_PER_COUNTRY},top:topOf(A),recent:RA.slice(-15).reverse().map(({link,av,cos,...x})=>{const k=dk(x,-2);return{...x,link:lk[k]||null,av:ak[k]||(k[0]=='#'?av:null)||null,cos:ck[k]||(k[0]=='#'?cos:null)||null}})});}catch(e){console.error(e.message);r.status(500).json({error:'db'})}});
 app.get('/api/country/:c',async(q,r)=>{try{const c=q.params.c.toUpperCase();if(!valid(c))return r.status(400).json({error:'bad country'});const A=agg(inScope(await all(),q));
- r.json({...wkInfo(),top:topOf(A),donors:A.filter(x=>x.c===c)});}catch(e){console.error(e.message);r.status(500).json({error:'db'})}});
+ const B=(await combined(inScope(await all(c),q),q))[c]||{donPts:0,gamePts:0,pts:0};r.json({...wkInfo(),top:topOf(A),donors:A.filter(x=>x.c===c),breakdown:{donations:B.donPts,game:B.gamePts,total:B.pts}});}catch(e){console.error(e.message);r.status(500).json({error:'db'})}});
 app.post('/api/contribute',async(q,r)=>{const{country:c,amount,name,message,link,avatar,cosmetics}=q.body;const cos=GX.verifyEquip(cosmetics);const cents=Math.round(+amount*100);
  if(!valid(c)||!(cents>=Math.round(MIN*100))||cents>99999900)return r.status(400).json({error:'The minimum contribution is $'+MIN+'.'});
  const lnk=cents>=2000?cleanLink(link):null;if(link&&String(link).trim()&&cents>=2000&&!lnk)return r.status(400).json({error:'Profile link must be a valid http(s) URL (max 200 characters).'});
