@@ -1,0 +1,2 @@
+# Put root-level static files here (Search Console HTML verification, etc.).
+# The builder copies them to public/.

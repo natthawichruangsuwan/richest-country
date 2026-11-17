@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>How to Make a Status Page — Richest Country Guides</title>
+  <meta name="description" content="Set up a free, self-hosted status page that checks your own URLs, shows 90-day uptime and incidents, and stays up when the product it monitors does not.">
+  <link rel="canonical" href="https://richest-country.onrender.com/guides/how-to-make-a-status-page/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Richest Country Guides">
+  <meta property="og:title" content="How to Make a Status Page — Richest Country Guides">
+  <meta property="og:description" content="Set up a free, self-hosted status page that checks your own URLs, shows 90-day uptime and incidents, and stays up when the product it monitors does not.">
+  <meta property="og:url" content="https://richest-country.onrender.com/guides/how-to-make-a-status-page/">
+  <meta property="og:image" content="https://richest-country.onrender.com/guides/assets/og-how-to-make-a-status-page.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="How to Make a Status Page — Richest Country Guides">
+  <meta name="twitter:description" content="Set up a free, self-hosted status page that checks your own URLs, shows 90-day uptime and incidents, and stays up when the product it monitors does not.">
+  <meta name="twitter:image" content="https://richest-country.onrender.com/guides/assets/og-how-to-make-a-status-page.png">
+  <link rel="icon" href="/guides/assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/guides/assets/styles.css">
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "How to Make a Status Page", "description": "Set up a free, self-hosted status page that checks your own URLs, shows 90-day uptime and incidents, and stays up when the product it monitors does not.", "datePublished": "2026-11-16", "dateModified": "2026-11-16", "inLanguage": "en", "mainEntityOfPage": "https://richest-country.onrender.com/guides/how-to-make-a-status-page/", "image": "https://richest-country.onrender.com/guides/assets/og-how-to-make-a-status-page.png", "author": {"@type": "Organization", "name": "Richest Country", "url": "https://richest-country.onrender.com/"}, "publisher": {"@type": "Organization", "name": "Richest Country", "url": "https://richestcountry.gumroad.com/"}, "keywords": "how to make a status page, how to create a service status page, how to make a server status page, how to make a status website"}</script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/guides/">Richest Country <small>Guides</small></a>
+      <nav class="nav" aria-label="Primary">
+        <a href="/guides/">Guides</a>
+        <a href="/">Leaderboard</a>
+        <a href="https://richestcountry.gumroad.com/">Store</a>
+      </nav>
+    </div>
+  </header>
+  <main id="main">
+
+    <article class="guide-wrap guide">
+      <p class="kicker">Status Page Kit</p>
+      <h1>How to Make a Status Page</h1>
+      <p class="meta">Published November 16, 2026 · 1,586 words · Richest Country</p>
+      <nav class="toc" aria-label="On this page"><strong>In this guide</strong><ol><li><a href="#what-a-useful-page-actually-shows">What a useful page actually shows</a></li><li><a href="#model-statuses-so-a-single-blip-is-not-a-major-outage">Model statuses so a single blip is not a &quot;major outage&quot;</a></li><li><a href="#check-the-urls-your-users-actually-feel">Check the URLs your users actually feel</a></li><li><a href="#incidents-are-a-timeline-not-a-title">Incidents are a timeline, not a title</a></li><li><a href="#badges-widgets-and-feeds">Badges, widgets, and feeds</a></li><li><a href="#deploy-it-so-the-checker-actually-runs">Deploy it so the checker actually runs</a></li></ol></nav>
+      <p>A status page is a public, boring, always-on site that answers one question: is the product working right now, and what happened when it was not? Users look for it when something already feels wrong. Support looks at it before writing the tenth identical reply. You look at it to be honest in public instead of silent.</p>
+<p>You can buy this as a hosted SaaS, or you can run a small app that checks your own URLs, stores the history in your own database, and costs only whatever you already pay for a tiny always-on host. This guide is the second path: a self-hosted page you can put on <code>status.yourdomain.com</code> for free at the software layer, with working monitoring, incidents, and badges. The examples come from a Status Page Kit; the design applies if you build the same pieces yourself.</p>
+<h2 id="what-a-useful-page-actually-shows">What a useful page actually shows</h2>
+<p>Visitors should understand the page in a few seconds, on a phone, without an account.</p>
+<ul><li>An overall banner: &quot;All systems operational,&quot; &quot;Degraded performance,&quot; or &quot;Major outage.&quot; This is a summary, not a vibe. It has to be derived from the components below it.</li><li>A list of <strong>components people recognize</strong>: Website, API, Checkout, Email — not the names of your internal microservices.</li><li>A 90-day uptime bar per component, with a way to see a single day.</li><li>A response-time sparkline if you collect timings, so a slow-but-up API is visible.</li><li>Recent incidents with a timeline of updates, plus scheduled maintenance.</li><li>A way to subscribe without creating an account: RSS or Atom is the honest minimum. Email or Slack can come later.</li><li>A link back to your product and a way to contact support.</li></ul>
+<p>That is the whole product. A status page that only says &quot;we&#x27;re down&quot; in a tweet, or that you update by editing a static HTML file during an outage, will go stale the first night you are busy.</p>
+<p>Two placement rules matter more than typography. Put the page on a <strong>different host</strong> from the app it monitors. If they share a server, the status page disappears in the same incident it is supposed to explain. And give it a URL people can guess or find: <code>status.yourdomain.com</code>, plus a footer link on the main site and in your help docs. When the main site is down, the footer link is useless, which is another reason the status host should be separate.</p>
+<p>The same rule applies if you are about to launch a <a href="/guides/how-to-create-a-waitlist-landing-page/">waitlist</a> or a <a href="/guides/how-to-make-a-donation-leaderboard-with-stripe/">donation leaderboard</a>: monitor them from somewhere that does not sleep and die with the app.</p>
+<h2 id="model-statuses-so-a-single-blip-is-not-a-major-outage">Model statuses so a single blip is not a &quot;major outage&quot;</h2>
+<p>If every failed check paints the banner red, you will train users to ignore you. A small, explicit state machine is enough:</p>
+<table><thead><tr><th>Status</th><th>When it appears</th></tr></thead><tbody><tr><td>Operational</td><td>The last check succeeded and was fast enough.</td></tr><tr><td>Degraded performance</td><td>The last check succeeded but was slower than a &quot;slow above&quot; threshold, <strong>or</strong> it is the first failed check in a streak.</td></tr><tr><td>Partial outage</td><td>Never from a check alone. You set this with a manual override or an incident.</td></tr><tr><td>Major outage</td><td>A configurable number of failed checks in a row (default two).</td></tr><tr><td>Under maintenance</td><td>The component is in a maintenance window that is in progress.</td></tr><tr><td>No data yet</td><td>Not checked yet. It should not drag the banner down.</td></tr></tbody></table>
+<p>The kit&#x27;s checker applies that in a few lines after each HTTP result:</p>
+<pre><code class="language-js">if (result.ok) {
+  status = result.ms &gt; fresh.degraded_ms ? &#x27;degraded&#x27; : &#x27;operational&#x27;;
+} else {
+  status = streak &gt;= m.failuresBeforeDown ? &#x27;major_outage&#x27; : &#x27;degraded&#x27;;
+}</code></pre>
+<p>The overall banner should also be conservative. A reasonable rule: if at least half of the visible components are in major outage, the banner is a major outage; if any component is in partial outage, say so; if any is degraded, say degraded; otherwise &quot;All systems operational.&quot; Manual overrides always win over the checker, which is how you tell the truth when the health endpoint is up and the product is still broken.</p>
+<p>Uptime math should be public and slightly generous in a way you can defend. Counting a &quot;degraded&quot; day as available (slow, but serving) is common. A 90-day bar that treats a one-minute blip as a fully down day is not. Store per-day tallies in UTC, and keep a short sparkline of recent results (a few hundred points is plenty).</p>
+<h2 id="check-the-urls-your-users-actually-feel">Check the URLs your users actually feel</h2>
+<p>A component needs a URL, not a novel. Prefer a dedicated health endpoint (<code>/health</code> or <code>/healthz</code>) that does not run a heavy query. Follow redirects. Fail on timeout. Optionally require a keyword in the body so an nginx default page does not count as &quot;the API is fine.&quot;</p>
+<p>You can describe the same list as code and load it on boot, then keep the dashboard as the source of truth afterwards (editing a service in the UI should not be overwritten by the file):</p>
+<pre><code class="language-json">[
+  {
+    &quot;name&quot;: &quot;Website&quot;,
+    &quot;group&quot;: &quot;Public&quot;,
+    &quot;description&quot;: &quot;Marketing site&quot;,
+    &quot;url&quot;: &quot;https://www.example.com/&quot;,
+    &quot;expectedStatus&quot;: &quot;200-399&quot;,
+    &quot;intervalSeconds&quot;: 60
+  },
+  {
+    &quot;name&quot;: &quot;API&quot;,
+    &quot;group&quot;: &quot;Public&quot;,
+    &quot;description&quot;: &quot;REST API health endpoint&quot;,
+    &quot;url&quot;: &quot;https://api.example.com/health&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;expectedStatus&quot;: &quot;200&quot;,
+    &quot;keyword&quot;: &quot;\&quot;ok\&quot;&quot;,
+    &quot;timeoutMs&quot;: 5000,
+    &quot;degradedMs&quot;: 800,
+    &quot;intervalSeconds&quot;: 30
+  },
+  {
+    &quot;name&quot;: &quot;Checkout&quot;,
+    &quot;group&quot;: &quot;Billing&quot;,
+    &quot;url&quot;: &quot;https://shop.example.com/health&quot;,
+    &quot;expectedStatus&quot;: &quot;200,204&quot;
+  }
+]</code></pre>
+<p>Useful per-component knobs:</p>
+<ul><li><strong>Expected status:</strong> <code>200</code>, <code>200-299</code>, or a list such as <code>200,204,301-308</code>.</li><li><strong>Interval:</strong> 60 seconds is fine for a marketing site; 30 seconds is reasonable for a checkout health check. A floor (for example 10 seconds) stops someone from checking every second and becoming the outage.</li><li><strong>Timeout:</strong> an 8 second default is plenty. A check that hangs is a failure.</li><li><strong>Slow above:</strong> a healthy response slower than this is &quot;Degraded performance.&quot; Set it from real timings, not from hope.</li><li><strong>Enabled:</strong> paused components should not be checked and should not appear on the public page.</li></ul>
+<p>Only publish what a customer would recognize. Internal workers, staging, and the admin panel can still be monitored privately. They do not belong on the public list.</p>
+<p>The User-Agent you send should identify the checker, and you should rate-limit the public API, badge, and feed endpoints so a scrape cannot become an incident of its own.</p>
+<h2 id="incidents-are-a-timeline-not-a-title">Incidents are a timeline, not a title</h2>
+<p>When something is wrong, post an incident from a password-protected admin page. Pick the affected components and a severity (<code>degraded</code>, <code>partial_outage</code>, or <code>major_outage</code>). Then write updates the way you would want to read them at 1 a.m.:</p>
+<ul><li><strong>Investigating.</strong> What users see, and that you are looking. &quot;Some users cannot log in. We are investigating.&quot;</li><li><strong>Identified.</strong> What you know. &quot;A database migration is causing the errors. We are rolling it back.&quot;</li><li><strong>Monitoring.</strong> The fix is live, and you are watching.</li><li><strong>Resolved.</strong> What happened, and that it is over.</li></ul>
+<p>During a long incident, post every 30 to 60 minutes even if the news is &quot;no change.&quot; Silence is how people decide you are hiding. Scheduled maintenance should be a first-class window with a start and end, not an incident you pretend is a surprise.</p>
+<p>After it is over, leave the incident on a history page with the full timeline. That history is how a status page earns trust on the quiet days.</p>
+<p>An optional webhook (Slack and Discord incoming webhooks accept a <code>text</code> or <code>content</code> field) should fire when a visible component status changes, when an incident is posted or updated, and when maintenance is scheduled. Delivery can be best-effort. The status page itself is the record; chat is a courtesy.</p>
+<h2 id="badges-widgets-and-feeds">Badges, widgets, and feeds</h2>
+<p>Once the page is public, let other surfaces point at it:</p>
+<ul><li>An SVG badge (<code>/badge.svg</code>) for a README or a docs header.</li><li>A one-line JavaScript widget you can drop on your marketing site.</li><li>A public JSON API for your own tooling.</li><li>RSS and Atom for people who do not want another email list.</li></ul>
+<p>Set <code>PUBLIC_URL</code> to the real origin so those snippets and feeds do not advertise <code>localhost</code>. Allow CORS on the JSON API if you want other sites to read it, and keep a tight rate limit.</p>
+<h2 id="deploy-it-so-the-checker-actually-runs">Deploy it so the checker actually runs</h2>
+<p>This is the part most &quot;free status page&quot; tutorials skip, and it is the part that fails first.</p>
+<p>The app is a single process that <strong>serves the page and runs the checker</strong>. If the host sleeps after 15 minutes idle, checks pause and your uptime graph becomes a fiction. If the filesystem is wiped on every deploy, you lose 90 days of history. So:</p>
+<ul><li>Use a host that stays running (a small always-on VM, Fly with a volume, Railway with a volume, or a Render Blueprint on a plan with a persistent disk). The included Docker image is enough for any VPS: build, run, mount a volume at the data directory, set <code>ADMIN_PASSWORD</code>, <code>SESSION_SECRET</code>, <code>PUBLIC_URL</code>, and <code>TRUST_PROXY=true</code> behind HTTPS.</li><li>Put the database on <strong>persistent storage</strong>. SQLite in a mounted volume is simple and honest. A JSON file works for a demo. An in-memory store is for tests.</li><li>Back up the data directory.</li><li>Set a long, random admin password and a stable <code>SESSION_SECRET</code> so a restart does not log everyone out.</li><li>Point a custom domain at it (<code>status.yourdomain.com</code>) and serve HTTPS. Render, Fly, and Railway will terminate TLS for you.</li></ul>
+<p>A two-minute local demo should exist and require no accounts. Seeded sample components, a &quot;Demo mode&quot; banner, and simulated checks are the right way to learn the UI. Production is the opposite: real URLs, a real password, a real public URL, and no demo banner.</p>
+<p>Before you share the link, do a short drill. Force a component into a manual outage, confirm the banner and the badge change, post an incident, resolve it, and confirm the history page keeps the timeline. Then put the component back on automatic checks. If you cannot complete that drill, users will not get a usable update during a real outage either.</p>
+<p>A status page is not a marketing site. It is a promise that when something breaks, there is a place that stays up, tells the truth, and still has yesterday&#x27;s history. Host it like you mean that.</p>
+      
+<aside class="cta" id="get-the-kit">
+  <h2>Get this running without starting from a blank repo</h2>
+  <p>A self-hosted status page and uptime monitor with incident posts, 90-day uptime bars, badges, and RSS. The <strong>Status Page Kit</strong> is the production code this guide is based on — config, anti-abuse rules, and a deploy blueprint included.</p>
+  <p class="codes"><strong>50% off</strong> with code <code>FLASH50</code> (through November 19, 2026 at 11:59 PM Pacific Time) · <strong>40% off</strong> with code <code>LAUNCH40</code> (through November 30, 2026 at 11:59 PM Pacific Time)<br>List price <span class="price">$49</span>. With <code>FLASH50</code> it is <span class="price">$24.50</span>.</p>
+  <a class="btn" href="https://richestcountry.gumroad.com/l/cpxzcf">Get the Status Page Kit →</a>
+</aside>
+
+      <section class="related"><h2>Keep going</h2><ul><li><a href="/guides/how-to-create-a-waitlist-landing-page/">How to Create a Waitlist Landing Page</a></li><li><a href="/guides/how-to-make-a-donation-leaderboard-with-stripe/">How to Make a Donation Leaderboard with Stripe</a></li></ul></section>
+    </article>
+    
+  </main>
+  <footer class="foot">
+    <div class="foot-inner">
+      <div>© 2026 Richest Country. Practical guides for shipping small web products.</div>
+      <div><a href="/">Leaderboard</a> · <a href="https://richestcountry.gumroad.com/">Gumroad store</a> · <a href="/guides/">All guides</a></div>
+    </div>
+  </footer>
+</body>
+</html>
