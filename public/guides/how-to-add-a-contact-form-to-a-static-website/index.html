@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>How to Add a Contact Form to a Static Website (Without a Backend You Have to Write) — Richest Country Guides</title>
+  <meta name="description" content="Add a contact form to a static website that emails you, using plain HTML or fetch(), allowed origins, and spam scoring on a self-hosted endpoint.">
+  <link rel="canonical" href="https://richest-country.onrender.com/guides/how-to-add-a-contact-form-to-a-static-website/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Richest Country Guides">
+  <meta property="og:title" content="How to Add a Contact Form to a Static Website (Without a Backend You Have to Write) — Richest Country Guides">
+  <meta property="og:description" content="Add a contact form to a static website that emails you, using plain HTML or fetch(), allowed origins, and spam scoring on a self-hosted endpoint.">
+  <meta property="og:url" content="https://richest-country.onrender.com/guides/how-to-add-a-contact-form-to-a-static-website/">
+  <meta property="og:image" content="https://richest-country.onrender.com/guides/assets/og-how-to-add-a-contact-form-to-a-static-website.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="How to Add a Contact Form to a Static Website (Without a Backend You Have to Write) — Richest Country Guides">
+  <meta name="twitter:description" content="Add a contact form to a static website that emails you, using plain HTML or fetch(), allowed origins, and spam scoring on a self-hosted endpoint.">
+  <meta name="twitter:image" content="https://richest-country.onrender.com/guides/assets/og-how-to-add-a-contact-form-to-a-static-website.png">
+  <link rel="icon" href="/guides/assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/guides/assets/styles.css">
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "How to Add a Contact Form to a Static Website (Without a Backend You Have to Write)", "description": "Add a contact form to a static website that emails you, using plain HTML or fetch(), allowed origins, and spam scoring on a self-hosted endpoint.", "datePublished": "2026-11-17", "dateModified": "2026-11-17", "inLanguage": "en", "mainEntityOfPage": "https://richest-country.onrender.com/guides/how-to-add-a-contact-form-to-a-static-website/", "image": "https://richest-country.onrender.com/guides/assets/og-how-to-add-a-contact-form-to-a-static-website.png", "author": {"@type": "Organization", "name": "Richest Country", "url": "https://richest-country.onrender.com/"}, "publisher": {"@type": "Organization", "name": "Richest Country", "url": "https://richestcountry.gumroad.com/"}, "keywords": "contact form for static website, free contact form for static website, contact form for static site, how to create an html form that sends you an email"}</script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/guides/">Richest Country <small>Guides</small></a>
+      <nav class="nav" aria-label="Primary">
+        <a href="/guides/">Guides</a>
+        <a href="/">Leaderboard</a>
+        <a href="https://richestcountry.gumroad.com/">Store</a>
+      </nav>
+    </div>
+  </header>
+  <main id="main">
+
+    <article class="guide-wrap guide">
+      <p class="kicker">Formbox Kit</p>
+      <h1>How to Add a Contact Form to a Static Website (Without a Backend You Have to Write)</h1>
+      <p class="meta">Published November 17, 2026 · 1,923 words · Richest Country</p>
+      <nav class="toc" aria-label="On this page"><strong>In this guide</strong><ol><li><a href="#a-static-host-serves-files">A static host serves files</a></li><li><a href="#four-ways-to-get-the-message-to-you">Four ways to get the message to you</a></li><li><a href="#add-the-form-in-plain-html">Add the form in plain HTML</a></li><li><a href="#send-it-with-fetch">Send it with fetch()</a></li><li><a href="#allowed-websites-are-the-cors-list">Allowed websites are the CORS list</a></li><li><a href="#score-the-spam-and-keep-what-you-catch">Score the spam, and keep what you catch</a></li><li><a href="#email-webhooks-and-the-inbox">Email, webhooks, and the inbox</a></li><li><a href="#deploy-it-on-a-disk-that-survives-the-next-push">Deploy it on a disk that survives the next push</a></li><li><a href="#faq">FAQ</a></li></ol></nav>
+      <p>A contact form for a static website is a small HTML form that has to deliver a message to you, even though the site itself is only files. GitHub Pages, a Netlify or Vercel static deploy, an S3 bucket, and a folder of plain HTML can all show the form. None of them can read the POST, store the row, or hand it to a mail server. This guide covers that limit, the usual ways around it, and a working setup: plain HTML and a <code>fetch()</code> version that both post to a self-hosted endpoint, with a honeypot, a time trap, an allowed-origin list, spam scoring, email and webhooks, and a disk that keeps the SQLite file.</p>
+<h2 id="a-static-host-serves-files">A static host serves files</h2>
+<p>When someone opens your contact page, the host looks up a file and returns it. A form pointed at that same page comes back as a 405, a 404, or the HTML again. GitHub Pages will not run a server you commit beside the markup. An S3 website endpoint does not execute code. A Netlify or Vercel static export behaves the same way until you attach a function, and that function is a backend you then have to write.</p>
+<p>The browser can already send <code>application/x-www-form-urlencoded</code>, <code>multipart/form-data</code>, or JSON. Leave the page where it is. Post to a small endpoint on another origin, such as <code>https://forms.yourdomain.com/f/k3m9x2qapz</code>. The page stays a file. The endpoint stores the message and emails you. Run that process on its own host, the same way a <a href="/guides/how-to-make-a-status-page/">status page</a> stays up on a machine of its own.</p>
+<h2 id="four-ways-to-get-the-message-to-you">Four ways to get the message to you</h2>
+<p><strong>Open the visitor&#x27;s mail app.</strong> <code>action=&quot;mailto:you@example.com&quot;</code> fills a draft in their mail program. There is no server, which is why it shows up in every thread about a free contact form for a static site. Many phones have no mail app, you get no copy in a mailbox you control, and nothing filters spam. Fine for a personal page with a message a month.</p>
+<p><strong>Hand the POST to a hosted form service.</strong> Their URL is the form action. They store the submission and email you. A free tier usually caps submissions or adds a badge, and the form goes quiet when the cap hits on launch day. A fair trade for a side project.</p>
+<p><strong>Write a serverless function.</strong> A Netlify Function, a Vercel route, or a Cloudflare Worker can accept the POST and call an email API. You then own parsing, CORS, and spam filtering. A good fit when you already deploy there and you only have one form.</p>
+<p><strong>Run a self-hosted form endpoint.</strong> A small Node process stores every submission in SQLite: an inbox, a spam folder, email, and webhooks. The static site never handles the POST, so the same HTML works on GitHub Pages, S3, Netlify, Vercel, or a VPS. The rest of this guide is that path. The code is from Formbox, on Node.js 22.13 or newer (24 if you are choosing today). SQLite is the one built into Node.</p>
+<p>You can try it with no accounts. <code>npm install</code> only checks the Node version, and <code>npm run demo</code> serves <code>http://localhost:3000</code> (password <code>demo-admin</code>). The sample data is a fictional app, Fieldnote Labs: six forms, about 490 submissions, about 58 of them spam. Mail is only logged, webhooks are simulated, and <code>/try</code> posts at the demo endpoints. <code>npm run seed</code> reloads those rows and refuses to wipe forms you created yourself.</p>
+<h2 id="add-the-form-in-plain-html">Add the form in plain HTML</h2>
+<p>Sign in, create a form, add your site under Allowed websites, and copy the Embed tab. The snippet already has your endpoint and the honeypot:</p>
+<pre><code class="language-html">&lt;form action=&quot;https://forms.yourdomain.com/f/k3m9x2qapz&quot; method=&quot;POST&quot;&gt;
+  &lt;label&gt;Name &lt;input type=&quot;text&quot; name=&quot;name&quot; required&gt;&lt;/label&gt;
+  &lt;label&gt;Email &lt;input type=&quot;email&quot; name=&quot;email&quot; required&gt;&lt;/label&gt;
+  &lt;label&gt;Message &lt;textarea name=&quot;message&quot; required&gt;&lt;/textarea&gt;&lt;/label&gt;
+
+  &lt;!-- Spam trap: people never see or fill this field --&gt;
+  &lt;input type=&quot;text&quot; name=&quot;_gotcha&quot; tabindex=&quot;-1&quot; autocomplete=&quot;off&quot;
+         style=&quot;position:absolute;left:-5000px&quot; aria-hidden=&quot;true&quot;&gt;
+
+  &lt;button type=&quot;submit&quot;&gt;Send&lt;/button&gt;
+&lt;/form&gt;
+
+&lt;!-- Optional: adds the time-trap field that stops bots which submit instantly --&gt;
+&lt;script src=&quot;https://forms.yourdomain.com/fb.js&quot; defer&gt;&lt;/script&gt;</code></pre>
+<p>Visible names are yours. <code>name</code>, <code>email</code>, <code>company</code>, or <code>plan</code> are stored as you named them, and checkboxes that share a name are stored as a list. A name starting with <code>_</code> steers the request and is not stored.</p>
+<p><code>_gotcha</code> is the honeypot: off screen, out of tab order, autocomplete off. People leave it empty. Bots fill it. Rename it per form if you want; the Embed tab follows.</p>
+<p><code>fb.js</code> writes <code>_t</code>, the page-load time in milliseconds, and <code>_page</code>, the full address of the page. Without <code>_page</code>, a top-pages report shows only the domain, because browsers usually omit the path on a cross-site post. <code>_page</code> is accepted only when it is on the site that posted.</p>
+<p>After submit, the visitor goes to <code>_next</code> if you sent it, else the form&#x27;s redirect URL, else a built-in thank-you page. <code>_next</code> has to be on an allowed origin or on the form server:</p>
+<pre><code class="language-html">&lt;input type=&quot;hidden&quot; name=&quot;_next&quot; value=&quot;https://www.yourdomain.com/thanks.html&quot;&gt;</code></pre>
+<p><code>_subject</code> is the notification subject. <code>_replyto</code> is the Reply-To header. Omit <code>_replyto</code> and the first email address in the submission is used, so a reply from your mail client reaches the person who wrote.</p>
+<p>Accepted bodies: a normal form post, <code>FormData</code> text fields (empty file inputs are ignored; a real file is <code>415</code>), JSON (nested objects stored as text), and <code>text/plain</code> JSON for <code>navigator.sendBeacon</code>. Limits default to 256 KB, 100 fields, and 10,000 characters per field (<code>413</code> over the limit, <code>422</code> if every field is empty, <code>404</code> if the form is missing or paused). JSON callers (<code>Accept: application/json</code>, a JSON content type, or <code>X-Requested-With</code>) get <code>200</code> and <code>{&quot;ok&quot;: true, &quot;id&quot;: 123, &quot;message&quot;: &quot;Thanks! Your message has been sent.&quot;}</code>. A plain form gets <code>303 See Other</code>. Spam gets that same success, so the status code teaches a bot nothing.</p>
+<h2 id="send-it-with-fetch">Send it with fetch()</h2>
+<p>To stay on the page, post JSON and ask for JSON. Record the load time before the visitor types, so the time trap has a real start:</p>
+<pre><code class="language-js">const startedAt = Date.now();
+form.addEventListener(&#x27;submit&#x27;, async (event) =&gt; {
+  event.preventDefault();
+  const data = Object.fromEntries(new FormData(form));
+  data._t = startedAt;
+  data._page = location.href;
+  const res = await fetch(&#x27;https://forms.yourdomain.com/f/k3m9x2qapz&#x27;, {
+    method: &#x27;POST&#x27;,
+    headers: { &#x27;Content-Type&#x27;: &#x27;application/json&#x27;, Accept: &#x27;application/json&#x27; },
+    body: JSON.stringify(data),
+  });
+  const result = await res.json();
+});</code></pre>
+<p>Show <code>result.message</code>. On failure, show <code>result.error</code>. The Embed tab&#x27;s React snippet is a complete component. Vue, Svelte, Astro, and Next.js do this same <code>fetch()</code>. The demo&#x27;s bug-report form is posted that way from an app. The endpoint cares about the origin and the body, not which framework rendered the button.</p>
+<h2 id="allowed-websites-are-the-cors-list">Allowed websites are the CORS list</h2>
+<p>Allowed websites is one origin per line: <code>https://www.yourdomain.com</code>, or <code>https://*.yourdomain.com</code> for every subdomain. Browsers send <code>Origin</code> on a form post and on <code>fetch()</code>. Anything else gets <code>403</code>, and CORS preflights are answered only for origins you listed.</p>
+<p>An empty list allows any website, which is handy while you test from <code>localhost</code>. Put the real origins in before the page is public, including a <code>github.io</code> or <code>pages.dev</code> host — a wildcard on your own domain does not cover those.</p>
+<p>A request with no <code>Origin</code> is accepted. curl does not send one. The check stops another site from embedding your form. A script is the spam score&#x27;s problem.</p>
+<p>A <a href="/guides/how-to-create-a-waitlist-landing-page/">waitlist landing page</a> that already has a signup API should keep it. This endpoint does not understand a referral code. Use it when the page is static and the job is to deliver a message.</p>
+<h2 id="score-the-spam-and-keep-what-you-catch">Score the spam, and keep what you catch</h2>
+<p>Every submission is scored. Each check adds points and a reason. Fifty or more is spam. Spam is stored, so a false positive can be rescued, and it never sends mail or calls a webhook. The sender still gets the ordinary success response.</p>
+<table><thead><tr><th>Check</th><th>Points</th><th>What it means</th></tr></thead><tbody><tr><td>Honeypot filled in</td><td>100</td><td>Default field <code>_gotcha</code> was not empty.</td></tr><tr><td>Sent too fast</td><td>100</td><td>Under the minimum (default 3 s). Needs <code>_t</code>.</td></tr><tr><td>Invalid timer</td><td>60</td><td><code>_t</code> is not a positive number, or it is over a minute ahead. Missing <code>_t</code> skips this.</td></tr><tr><td>Too many links</td><td>60</td><td>Over the limit (default 3; <code>-1</code> means unlimited).</td></tr><tr><td>HTML or BBCode links</td><td>60</td><td><code>&lt;a href</code>, <code>[url=</code>, or <code>[link=</code>.</td></tr><tr><td>Your blocked phrase</td><td>60 each</td><td>Whole-word match. One hit is spam.</td></tr><tr><td>Built-in phrase</td><td>40 each</td><td>&quot;SEO services&quot;, &quot;backlinks&quot;, &quot;crypto investment&quot;, &quot;casino&quot;, &quot;payday loan&quot;, &quot;buy followers&quot;, plus about twenty more. Two hits are spam.</td></tr><tr><td>Gibberish</td><td>50</td><td>45+ letters or digits in a row, URLs ignored.</td></tr><tr><td>Same value everywhere</td><td>30</td><td>Three or more fields, one repeated non-empty value.</td></tr><tr><td>Known spam sender</td><td>50</td><td>Salted IP hash you marked before.</td></tr></tbody></table>
+<p>Your phrases are checked first, then the built-in list, and only three hits are recorded. A form with no <code>_t</code> (plain HTML, no <code>fb.js</code>) skips the timer, so the honeypot has to do that job. The function below is the kit&#x27;s scorer. <code>valueText</code> comes from the parser; underscore fields arrive separately as <code>meta</code>.</p>
+<pre><code class="language-js">const { valueText } = require(&#x27;./parse&#x27;);
+
+const THRESHOLD = 50;
+
+const DEFAULT_BLOCKED = [
+  &#x27;viagra&#x27;, &#x27;cialis&#x27;, &#x27;casino&#x27;, &#x27;crypto investment&#x27;, &#x27;bitcoin investment&#x27;, &#x27;forex signals&#x27;, &#x27;binary options&#x27;,
+  &#x27;seo services&#x27;, &#x27;backlinks&#x27;, &#x27;guest post&#x27;, &#x27;rank your website&#x27;, &#x27;first page of google&#x27;, &#x27;website traffic&#x27;,
+  &#x27;payday loan&#x27;, &#x27;loan offer&#x27;, &#x27;escort&#x27;, &#x27;porn&#x27;, &#x27;xxx&#x27;, &#x27;replica watches&#x27;, &#x27;buy followers&#x27;, &#x27;make money online&#x27;,
+  &#x27;work from home opportunity&#x27;, &#x27;whatsapp me&#x27;, &#x27;telegram me&#x27;, &#x27;unsubscribe from this list&#x27;,
+];
+
+const escapeRe = (s) =&gt; s.replace(/[.*+?^${}()|[\]\\]/g, &#x27;\\$&amp;&#x27;);
+const wordList = (text) =&gt; String(text || &#x27;&#x27;).split(/[\n,]/).map((w) =&gt; w.trim().toLowerCase()).filter(Boolean);
+
+function countLinks(text) {
+  const m = text.match(/\bhttps?:\/\/[^\s&lt;&gt;&quot;&#x27;]+|\bwww\.[a-z0-9-]+\.[a-z]{2,}/gi);
+  return m ? m.length : 0;
+}
+
+function score(fields, meta, form, ctx = {}) {
+  const now = ctx.now || Date.now();
+  const reasons = [];
+  let points = 0;
+  const add = (n, why) =&gt; { points += n; reasons.push(why); };
+
+  const hp = form.honeypot_field || &#x27;_gotcha&#x27;;
+  if (meta[hp]) add(100, &#x27;Honeypot field was filled in&#x27;);
+
+  if (meta._t !== undefined &amp;&amp; meta._t !== &#x27;&#x27;) {
+    const t = Number(meta._t);
+    const min = Number(form.min_seconds || 0);
+    if (!Number.isFinite(t) || t &lt;= 0 || t &gt; now + 60000) add(60, &#x27;Invalid form timer&#x27;);
+    else if (min &gt; 0 &amp;&amp; now - t &lt; min * 1000) {
+      add(100, `Sent ${((now - t) / 1000).toFixed(1)} s after the page loaded (minimum ${min} s)`);
+    }
+  }
+
+  const values = Object.values(fields).map(valueText);
+  const text = values.join(&#x27;\n&#x27;);
+  const lower = text.toLowerCase();
+
+  const links = countLinks(text);
+  const maxLinks = Number.isFinite(Number(form.max_links)) ? Number(form.max_links) : 3;
+  if (maxLinks &gt;= 0 &amp;&amp; links &gt; maxLinks) add(60, `${links} links (limit ${maxLinks})`);
+  if (/\[url=|\[link=|&lt;a\s+href=/i.test(text)) add(60, &#x27;HTML or BBCode links&#x27;);
+
+  const own = wordList(form.blocked_words);
+  const hits = [];
+  for (const [list, pts] of [[own, 60], [DEFAULT_BLOCKED, 40]]) {
+    for (const w of list) {
+      if (hits.length &gt;= 3) break;
+      const matched = new RegExp(`(^|[^a-z0-9])${escapeRe(w)}($|[^a-z0-9])`, &#x27;i&#x27;).test(lower);
+      if (matched &amp;&amp; !hits.some((h) =&gt; h.w === w)) hits.push({ w, pts });
+    }
+  }
+  for (const h of hits) add(h.pts, `Blocked phrase &quot;${h.w}&quot;`);
+
+  if (values.some((v) =&gt; /[A-Za-z0-9]{45,}/.test(v.replace(/https?:\/\/\S+/g, &#x27;&#x27;)))) {
+    add(50, &#x27;Gibberish text&#x27;);
+  }
+  if (values.length &gt;= 3 &amp;&amp; new Set(values.filter(Boolean)).size === 1) {
+    add(30, &#x27;Every field has the same value&#x27;);
+  }
+
+  if (ctx.ipMarkedSpam) add(50, &#x27;Sender was marked as spam before&#x27;);
+
+  return { spam: points &gt;= THRESHOLD, score: Math.min(points, 999), reasons };
+}</code></pre>
+<p>A normal note scores 0 and may notify you. Two built-in phrases score 80. One phrase from your own list scores 60.</p>
+<p>The rate limit is 10 posts per visitor, per form, per 10 minutes (<code>SUBMIT_RATE_LIMIT</code>); the next is <code>429</code> and is not stored. Captcha is optional: set <code>TURNSTILE_*</code> or <code>HCAPTCHA_*</code>, restart, and pick it in Settings so the Embed tab includes the widget. Tokens arrive as <code>cf-turnstile-response</code> or <code>h-captcha-response</code>. With no secret set, that check is skipped. A bad token is <code>400</code>.</p>
+<p>Spam sits in the Spam folder with its reasons and is deleted after 30 days (<code>SPAM_RETENTION_DAYS</code>). <strong>Not spam</strong> moves the row to the inbox and sends the email and webhooks it missed, once. <strong>Spam</strong> flags that sender next time.</p>
+<h2 id="email-webhooks-and-the-inbox">Email, webhooks, and the inbox</h2>
+<p>The inbox is the record. Mail is a notification on top of it. Set <code>SMTP_*</code> when you want a copy in your own mailbox; with it unset, the dashboard still collects every row. The demo contact form already has a redirect, email, and a webhook, and the demo waitlist form includes failed webhook deliveries so you can see a miss with nothing live. Demo mode only logs mail and simulates webhooks. A spam row fires neither. The row is stored before SMTP or the webhook runs, so a failed notification does not lose the message.</p>
+<h2 id="deploy-it-on-a-disk-that-survives-the-next-push">Deploy it on a disk that survives the next push</h2>
+<p>SQLite is one file. A host that replaces the filesystem on deploy will throw the inbox away. Use a machine that keeps files: a small VPS, or Render, Fly, or Railway with a persistent disk or volume. Point <code>forms.yourdomain.com</code> at it and serve HTTPS.</p>
+<p>On a VPS, copy <code>.env.example</code> to <code>.env</code>.</p>
+<ul><li><code>ADMIN_PASSWORD</code>: a long random string. <code>demo-admin</code> stays on your laptop.</li><li><code>PUBLIC_URL</code>: the origin with no trailing slash, such as <code>https://forms.yourdomain.com</code>.</li><li><code>TRUST_PROXY=true</code> behind Render, Fly, Railway, Nginx, Caddy, or Cloudflare, so the rate limit and the sender hash see the visitor&#x27;s address.</li><li><code>SMTP_*</code>: only when you want email.</li></ul>
+<p><code>npm start</code>, or the Docker image. <code>GET /healthz</code> should answer. Create the form, add the static origin with its scheme, paste the snippet, and send a test from the real page. A second test with the honeypot filled belongs in Spam, with no email and no webhook.</p>
+<p>Keep the database file on that disk. The HTML can live on a host that sleeps. The form endpoint should stay awake, and <code>/healthz</code> belongs on a status page hosted somewhere else, so a full disk does not hide the outage notice too.</p>
+<h2 id="faq">FAQ</h2>
+<h3 id="can-i-add-a-free-contact-form-to-a-static-website">Can I add a free contact form to a static website?</h3>
+<p>The page is free on the host you already use. <code>mailto:</code> costs nothing and depends on the visitor&#x27;s mail app. A hosted service is often free until a monthly cap. Self-hosting costs whatever the machine with the disk costs. Demo mode needs no keys.</p>
+<h3 id="how-do-i-create-an-html-form-that-sends-me-an-email">How do I create an HTML form that sends me an email?</h3>
+<p>Point the form above at your endpoint and set <code>SMTP_*</code> there. <code>_replyto</code> sets Reply-To; otherwise the first email in the submission is used. <code>_subject</code> sets the subject. The form host sends the mail after the row is stored.</p>
+<h3 id="will-this-work-on-github-pages-netlify-vercel-and-s3">Will this work on GitHub Pages, Netlify, Vercel, and S3?</h3>
+<p>Yes. Those hosts only serve the HTML. List every origin you submit from. <code>https://*.yourdomain.com</code> covers your subdomains. A <code>github.io</code> or <code>pages.dev</code> hostname needs its own line.</p>
+<h3 id="what-does-a-visitor-see-when-the-message-is-spam">What does a visitor see when the message is spam?</h3>
+<p>The same thank-you redirect, or the same <code>{&quot;ok&quot;: true}</code> JSON, as a real message. The row is in Spam with the reasons, and nothing is emailed. Past 10 posts in 10 minutes the answer is <code>429</code> and the post is dropped.</p>
+<h3 id="do-i-have-to-add-a-captcha">Do I have to add a captcha?</h3>
+<p>The honeypot, the time trap, the link limit, and both phrase lists run with no third-party account. Add Turnstile or hCaptcha per form when you want it. Until that secret key is set, the score still runs on its own.</p>
+      
+<aside class="cta" id="get-the-kit">
+  <h2>Get this running without starting from a blank repo</h2>
+  <p>A self-hosted form backend for static sites: spam filtering, an inbox dashboard, email notifications, webhooks and CSV export. Node + SQLite, demo mode with no keys. The <strong>Formbox Kit</strong> is the production code this guide is based on — config, anti-abuse rules, and a deploy blueprint included.</p>
+  <p class="codes"><strong>50% off</strong> with code <code>FLASH50</code> (through November 19, 2026 at 11:59 PM Pacific Time) · <strong>40% off</strong> with code <code>LAUNCH40</code> (through November 30, 2026 at 11:59 PM Pacific Time)<br>List price <span class="price">$39</span>. With <code>FLASH50</code> it is <span class="price">$19.50</span>.</p>
+  <a class="btn" href="https://richestcountry.gumroad.com/l/yiutjv">Get the Formbox Kit →</a>
+</aside>
+
+      <section class="related"><h2>Keep going</h2><ul><li><a href="/guides/how-to-create-a-waitlist-landing-page/">How to Create a Waitlist Landing Page</a></li><li><a href="/guides/how-to-make-a-status-page/">How to Make a Status Page</a></li></ul></section>
+    </article>
+    
+  </main>
+  <footer class="foot">
+    <div class="foot-inner">
+      <div>© 2026 Richest Country. Practical guides for shipping small web products.</div>
+      <div><a href="/">Leaderboard</a> · <a href="https://richestcountry.gumroad.com/">Gumroad store</a> · <a href="/guides/">All guides</a></div>
+    </div>
+  </footer>
+</body>
+</html>

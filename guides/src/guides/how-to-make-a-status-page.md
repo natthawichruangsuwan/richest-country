@@ -28,7 +28,7 @@ Visitors should understand the page in a few seconds, on a phone, without an acc
 - A response-time sparkline if you collect timings, so a slow-but-up API is visible.
 - Recent incidents with a timeline of updates, plus scheduled maintenance.
 - A way to subscribe without creating an account: RSS or Atom is the honest minimum. Email or Slack can come later.
-- A link back to your product and a way to contact support.
+- A link back to your product and a way to contact support. On a static marketing site, make that a [contact form posting to its own endpoint](/guides/how-to-add-a-contact-form-to-a-static-website/) so the status host only has to stay up.
 
 That is the whole product. A status page that only says "we're down" in a tweet, or that you update by editing a static HTML file during an outage, will go stale the first night you are busy.
 

@@ -37,7 +37,7 @@
     <article class="guide-wrap guide">
       <p class="kicker">Waitlist Launch Kit</p>
       <h1>How to Create a Waitlist Landing Page</h1>
-      <p class="meta">Published November 16, 2026 · 1,452 words · Richest Country</p>
+      <p class="meta">Published November 16, 2026 · 1,477 words · Richest Country</p>
       <nav class="toc" aria-label="On this page"><strong>In this guide</strong><ol><li><a href="#what-the-page-needs-and-what-to-leave-out">What the page needs (and what to leave out)</a></li><li><a href="#the-signup-request-should-be-boring-and-strict">The signup request should be boring and strict</a></li><li><a href="#rank-the-queue-at-read-time">Rank the queue at read time</a></li><li><a href="#give-yourself-an-admin-page-and-a-csv">Give yourself an admin page and a CSV</a></li><li><a href="#brand-it-from-one-file-then-deploy-it-like-it-matters">Brand it from one file, then deploy it like it matters</a></li><li><a href="#test-the-live-page-before-you-share-the-link">Test the live page before you share the link</a></li></ol></nav>
       <p>A waitlist landing page has one job: get the right visitor to leave an email, then show them what happens next. If you are launching a product, that page is also your first growth loop — each person should leave with a unique link, and friends who join through that link should move the referrer up the queue.</p>
 <p>You can collect addresses with a Google Form in an afternoon. You cannot run a fair referral queue, a position page, or a private admin export that way. This guide covers the page itself, the signup API, the ranking math, and the boring production details that decide whether the list is still there after a deploy. The code examples are taken from a working Waitlist Launch Kit; the same design works if you build it yourself.</p>
@@ -77,7 +77,7 @@
   const ref = String(body.ref || &#x27;&#x27;).trim().toLowerCase();
   // validate email, reuse an existing row, or create a new one
 });</code></pre>
-<p>Returning a realistic-looking payload stops the bot from retrying with different garbage. It also avoids teaching scrapers which field was the trap.</p>
+<p>Returning a realistic-looking payload stops the bot from retrying with different garbage. It also avoids teaching scrapers which field was the trap. A <a href="/guides/how-to-add-a-contact-form-to-a-static-website/">contact form on a static website</a> uses that same fake success, then keeps the trapped message in a spam folder instead of dropping it.</p>
 <p>Assign every real signup an 8-character referral code and make sure it is unique. Build the public link from <code>BASE_URL</code>, not from the request host header, so a misconfigured proxy cannot mint links on the wrong domain.</p>
 <h2 id="rank-the-queue-at-read-time">Rank the queue at read time</h2>
 <p>A fair referral queue can be a single SQL expression. Each person starts with a position equal to the order they joined (their row id, if ids are monotonic). Each confirmed friend subtracts a configurable number of spots. Ties go to whoever joined first.</p>
