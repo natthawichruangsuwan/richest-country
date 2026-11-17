@@ -39,6 +39,12 @@
       "price": 49,
       "url": "https://richestcountry.gumroad.com/l/cpxzcf",
       "blurb": "A self-hosted status page and uptime monitor with incident posts, 90-day uptime bars, badges, and RSS."
+    },
+    "formbox": {
+      "name": "Formbox Kit",
+      "price": 39,
+      "url": "https://richestcountry.gumroad.com/l/yiutjv",
+      "blurb": "A self-hosted form backend for static sites: spam filtering, an inbox dashboard, email notifications, webhooks and CSV export. Node + SQLite, demo mode with no keys."
     }
   }
 }

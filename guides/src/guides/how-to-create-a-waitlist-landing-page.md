@@ -77,7 +77,7 @@ app.post('/api/signup', async (req, res) => {
 });
 ```
 
-Returning a realistic-looking payload stops the bot from retrying with different garbage. It also avoids teaching scrapers which field was the trap.
+Returning a realistic-looking payload stops the bot from retrying with different garbage. It also avoids teaching scrapers which field was the trap. A [contact form on a static website](/guides/how-to-add-a-contact-form-to-a-static-website/) uses that same fake success, then keeps the trapped message in a spam folder instead of dropping it.
 
 Assign every real signup an 8-character referral code and make sure it is unique. Build the public link from `BASE_URL`, not from the request host header, so a misconfigured proxy cannot mint links on the wrong domain.
 
