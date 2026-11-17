@@ -1,0 +1,248 @@
+/* Richest Country Guides — editorial, mobile-first, no framework */
+:root {
+  --bg: #f6f1e8;
+  --bg-elev: #fffdf8;
+  --ink: #1c1710;
+  --ink-soft: #4a4338;
+  --muted: #6f675b;
+  --line: #d9d0c0;
+  --accent: #8a5a12;
+  --accent-deep: #6b430d;
+  --gold: #c9a227;
+  --code-bg: #221c16;
+  --code-ink: #f3ead8;
+  --cta-bg: #1c1710;
+  --cta-ink: #f6f1e8;
+  --ok: #2c6b3c;
+  --warn: #8a5a12;
+  --max: 42rem;
+  --wide: 72rem;
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+  --sans: "Source Sans 3", "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --mono: "IBM Plex Mono", "ui-monospace", "SFMono-Regular", Menlo, Consolas, monospace;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+img { max-width: 100%; height: auto; }
+a { color: var(--accent-deep); text-underline-offset: 0.14em; }
+a:hover { color: var(--accent); }
+code, kbd {
+  font-family: var(--mono);
+  font-size: 0.9em;
+  background: #efe8da;
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+}
+pre {
+  background: var(--code-bg);
+  color: var(--code-ink);
+  padding: 1rem 1.1rem;
+  overflow-x: auto;
+  border-radius: 6px;
+  line-height: 1.5;
+  font-size: 0.88rem;
+}
+pre code { background: none; padding: 0; color: inherit; font-size: inherit; }
+.skip {
+  position: absolute;
+  left: -999px;
+  top: 0;
+}
+.skip:focus {
+  left: 1rem;
+  top: 1rem;
+  background: #fff;
+  padding: 0.4rem 0.7rem;
+  z-index: 10;
+}
+
+.topbar {
+  border-bottom: 1px solid var(--line);
+  background: var(--bg-elev);
+}
+.topbar-inner, .foot-inner, .wrap, .hero-inner {
+  width: min(100% - 2rem, var(--wide));
+  margin: 0 auto;
+}
+.topbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 3.5rem;
+}
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: 0.55rem;
+  text-decoration: none;
+  color: var(--ink);
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+.brand small {
+  font-weight: 500;
+  color: var(--muted);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 0.68rem;
+}
+.nav { display: flex; gap: 1.1rem; font-size: 0.95rem; }
+.nav a { color: var(--ink-soft); text-decoration: none; }
+.nav a:hover { color: var(--ink); text-decoration: underline; }
+
+.hero {
+  padding: 3.2rem 0 2.6rem;
+  border-bottom: 1px solid var(--line);
+  background:
+    radial-gradient(1200px 280px at 10% 0%, rgba(201, 162, 39, 0.14), transparent 60%),
+    var(--bg);
+}
+.kicker {
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 650;
+  margin: 0 0 0.7rem;
+}
+.hero h1, .page-title, .guide h1 {
+  font-family: var(--serif);
+  font-weight: 650;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  margin: 0 0 0.8rem;
+}
+.hero h1 { font-size: clamp(2.1rem, 5vw, 3.4rem); max-width: 20ch; }
+.lede { font-size: 1.2rem; color: var(--ink-soft); max-width: 40rem; margin: 0; }
+
+.section { padding: 2.4rem 0 3rem; }
+.section h2, .guide h2 {
+  font-family: var(--serif);
+  font-size: 1.7rem;
+  letter-spacing: -0.02em;
+  margin: 2.2rem 0 0.7rem;
+}
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16.5rem, 1fr));
+  gap: 1rem;
+  margin-top: 1.2rem;
+}
+.card {
+  background: var(--bg-elev);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 1.15rem 1.2rem 1.25rem;
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  height: 100%;
+}
+a.card:hover { border-color: var(--gold); box-shadow: 0 6px 20px rgba(28, 23, 16, 0.06); }
+.card h3 {
+  font-family: var(--serif);
+  font-size: 1.25rem;
+  margin: 0 0 0.45rem;
+  letter-spacing: -0.02em;
+}
+.card p { margin: 0; color: var(--ink-soft); font-size: 0.98rem; }
+.meta { color: var(--muted); font-size: 0.85rem; margin: 0 0 0.5rem; }
+
+.guide-wrap { width: min(100% - 2rem, var(--max)); margin: 0 auto; padding: 2rem 0 3.5rem; }
+.guide h1 { font-size: clamp(1.9rem, 4vw, 2.6rem); }
+.guide h3 { margin: 1.6rem 0 0.5rem; font-size: 1.12rem; }
+.guide p, .guide li { color: var(--ink); }
+.guide ul, .guide ol { padding-left: 1.25rem; }
+.guide li { margin: 0.28rem 0; }
+.guide li > p { margin: 0.2rem 0; }
+.guide hr {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: 2.2rem 0;
+}
+.guide blockquote {
+  margin: 1.3rem 0;
+  padding: 0.1rem 0 0.1rem 1rem;
+  border-left: 3px solid var(--gold);
+  color: var(--ink-soft);
+}
+.guide table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+  margin: 1.1rem 0 1.4rem;
+}
+.guide th, .guide td {
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+  padding: 0.5rem 0.6rem 0.5rem 0;
+}
+.guide th { font-size: 0.8rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+.toc {
+  background: #efe8da;
+  border-radius: 8px;
+  padding: 0.9rem 1rem 1rem;
+  margin: 1.4rem 0 1.8rem;
+}
+.toc strong { display: block; margin-bottom: 0.35rem; font-size: 0.82rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.toc ol { margin: 0; padding-left: 1.2rem; }
+.toc a { text-decoration: none; }
+
+.cta {
+  background: var(--cta-bg);
+  color: var(--cta-ink);
+  border-radius: 10px;
+  padding: 1.4rem 1.35rem 1.5rem;
+  margin: 2.4rem 0 1.2rem;
+}
+.cta h2 { color: #fff; margin: 0 0 0.5rem; font-size: 1.45rem; }
+.cta p { color: #e7dfd0; margin: 0 0 0.7rem; }
+.cta .codes { margin: 0 0 1rem; font-size: 0.95rem; color: #e7dfd0; }
+.cta .codes code {
+  background: #3a3228;
+  color: #f3ead8;
+  padding: 0.15em 0.4em;
+}
+.btn {
+  display: inline-block;
+  background: var(--gold);
+  color: #1c1710;
+  font-weight: 700;
+  text-decoration: none;
+  padding: 0.7rem 1.05rem;
+  border-radius: 6px;
+}
+.btn:hover { filter: brightness(1.06); color: #1c1710; }
+.price { font-variant-numeric: tabular-nums; }
+
+.related { margin-top: 2rem; }
+.related ul { padding-left: 1.15rem; }
+
+.foot {
+  border-top: 1px solid var(--line);
+  padding: 1.6rem 0 2.2rem;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+.foot-inner { display: flex; flex-wrap: wrap; gap: 0.6rem 1.4rem; justify-content: space-between; }
+.foot a { color: var(--ink-soft); }
+
+@media (max-width: 640px) {
+  body { font-size: 1.02rem; }
+  .nav { gap: 0.8rem; }
+  .hero { padding: 2.2rem 0 1.8rem; }
+  pre { font-size: 0.8rem; padding: 0.85rem; }
+  .guide table { display: block; overflow-x: auto; }
+}

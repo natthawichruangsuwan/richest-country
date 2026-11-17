@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>How to Make a Donation Leaderboard with Stripe — Richest Country Guides</title>
+  <meta name="description" content="Build a live donation leaderboard that credits points only after a verified Stripe payment, resets every week in a real time zone, and stays honest when the same webhook arrives twice.">
+  <link rel="canonical" href="https://richest-country.onrender.com/guides/how-to-make-a-donation-leaderboard-with-stripe/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Richest Country Guides">
+  <meta property="og:title" content="How to Make a Donation Leaderboard with Stripe — Richest Country Guides">
+  <meta property="og:description" content="Build a live donation leaderboard that credits points only after a verified Stripe payment, resets every week in a real time zone, and stays honest when the same webhook arrives twice.">
+  <meta property="og:url" content="https://richest-country.onrender.com/guides/how-to-make-a-donation-leaderboard-with-stripe/">
+  <meta property="og:image" content="https://richest-country.onrender.com/guides/assets/og-how-to-make-a-donation-leaderboard-with-stripe.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="How to Make a Donation Leaderboard with Stripe — Richest Country Guides">
+  <meta name="twitter:description" content="Build a live donation leaderboard that credits points only after a verified Stripe payment, resets every week in a real time zone, and stays honest when the same webhook arrives twice.">
+  <meta name="twitter:image" content="https://richest-country.onrender.com/guides/assets/og-how-to-make-a-donation-leaderboard-with-stripe.png">
+  <link rel="icon" href="/guides/assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/guides/assets/styles.css">
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "How to Make a Donation Leaderboard with Stripe", "description": "Build a live donation leaderboard that credits points only after a verified Stripe payment, resets every week in a real time zone, and stays honest when the same webhook arrives twice.", "datePublished": "2026-11-16", "dateModified": "2026-11-16", "inLanguage": "en", "mainEntityOfPage": "https://richest-country.onrender.com/guides/how-to-make-a-donation-leaderboard-with-stripe/", "image": "https://richest-country.onrender.com/guides/assets/og-how-to-make-a-donation-leaderboard-with-stripe.png", "author": {"@type": "Organization", "name": "Richest Country", "url": "https://richest-country.onrender.com/"}, "publisher": {"@type": "Organization", "name": "Richest Country", "url": "https://richestcountry.gumroad.com/"}, "keywords": "how to make a donation leaderboard, how to create a donation leaderboard, how to make a donation leaderboard with Stripe, how to build a Stripe-powered leaderboard"}</script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/guides/">Richest Country <small>Guides</small></a>
+      <nav class="nav" aria-label="Primary">
+        <a href="/guides/">Guides</a>
+        <a href="/">Leaderboard</a>
+        <a href="https://richestcountry.gumroad.com/">Store</a>
+      </nav>
+    </div>
+  </header>
+  <main id="main">
+
+    <article class="guide-wrap guide">
+      <p class="kicker">Leaderboard Starter Kit</p>
+      <h1>How to Make a Donation Leaderboard with Stripe</h1>
+      <p class="meta">Published November 16, 2026 · 1,587 words · Richest Country</p>
+      <nav class="toc" aria-label="On this page"><strong>In this guide</strong><ol><li><a href="#what-you-are-actually-building">What you are actually building</a></li><li><a href="#do-not-credit-the-success-url">Do not credit the success URL</a></li><li><a href="#verify-the-webhook-then-make-it-idempotent">Verify the webhook, then make it idempotent</a></li><li><a href="#compute-points-at-read-time">Compute points at read time</a></li><li><a href="#reset-the-week-in-a-real-time-zone">Reset the week in a real time zone</a></li><li><a href="#keep-branding-in-one-file">Keep branding in one file</a></li><li><a href="#if-you-also-ship-a-minigame-still-do-not-trust-the-client">If you also ship a minigame, still do not trust the client</a></li><li><a href="#run-it-locally-then-put-a-real-database-behind-it">Run it locally, then put a real database behind it</a></li><li><a href="#a-short-checklist-before-you-take-real-money">A short checklist before you take real money</a></li></ol></nav>
+      <p>A donation leaderboard is a public ranking that moves when someone pays. Visitors pick a cause, a country, a team, or a character, send money through Stripe Checkout, and watch that entry climb a live board. The interesting part is not the HTML list. It is making the ranking trustworthy: points should come from a paid Checkout Session, not from a number the browser volunteered, and a replayed webhook should never count twice.</p>
+<p>This guide walks through that design as it works in a production kit: configurable branding, points computed at read time, a Monday-to-Monday weekly reset in a named time zone, and a free minigame that also refuses to trust the client. You can follow the same architecture in your own repo, or start from the kit this code is taken from.</p>
+<h2 id="what-you-are-actually-building">What you are actually building</h2>
+<p>Three pieces have to work together:</p>
+<ol><li>A checkout flow that collects a small, structured payload (who paid, which entry they backed, an optional name and message) without putting secret keys in the page.</li><li>A webhook endpoint that verifies Stripe&#x27;s signature, checks the event type and payment status, and credits the donation exactly once.</li><li>A read API that totals those donations into a board — this week and all-time — and renders a podium, a searchable list, and a recent-payments feed.</li></ol>
+<p>Everything else is product: weekly champions, a hall of fame, share links, a theme, a legal page. Those matter once the money path is honest.</p>
+<p>If you only store scores in <code>localStorage</code>, you have a personal best, not a leaderboard. A board needs a shared store and a server that decides what a payment is worth.</p>
+<h2 id="do-not-credit-the-success-url">Do not credit the success URL</h2>
+<p>Stripe Checkout will send the donor back to a success URL you choose. That redirect is a convenience for the visitor. It is not proof of payment. Anyone can open the URL, add query parameters, or replay it.</p>
+<p>The reliable signal is the <code>checkout.session.completed</code> webhook, and only when <code>payment_status</code> is <code>paid</code>. The kit creates the Checkout Session on the server (<code>POST /api/contribute</code>) and puts the country, name, message, and other display fields in the session <code>metadata</code>. The browser never tells the server &quot;add 5,000 points.&quot; It only starts Checkout. The webhook is what writes the row.</p>
+<p>That split is the whole security model. If you take one thing from this guide, take that.</p>
+<h2 id="verify-the-webhook-then-make-it-idempotent">Verify the webhook, then make it idempotent</h2>
+<p>A webhook handler has to do three unglamorous things well: reject unsigned events, reject stale events, and survive retries.</p>
+<p>Stripe signs the raw request body with the endpoint&#x27;s signing secret. The header looks like <code>t=&lt;timestamp&gt;,v1=&lt;hex&gt;</code>. The expected signature is HMAC-SHA256 of <code>timestamp + &#x27;.&#x27; + raw_body</code>. Compare it with a constant-time function, and reject events whose timestamp is older than a short window (five minutes is a reasonable default). If a Stripe secret key is configured but the webhook secret is missing, refuse the event outright — otherwise anyone who can POST to <code>/webhook</code> could invent a payment.</p>
+<p>Here is the verification and credit path, cleaned up from the kit&#x27;s <code>server.js</code> but with the same checks:</p>
+<pre><code class="language-js">app.post(&#x27;/webhook&#x27;, express.raw({ type: &#x27;*/*&#x27; }), async (req, res) =&gt; {
+  if (!WEBHOOK_SECRET) {
+    if (STRIPE_SECRET_KEY) {
+      return res.status(500).send(&#x27;webhook secret not configured&#x27;);
+    }
+  } else {
+    const sig = String(req.headers[&#x27;stripe-signature&#x27;] || &#x27;&#x27;);
+    const parts = sig.split(&#x27;,&#x27;).map((x) =&gt; x.split(&#x27;=&#x27;));
+    const t = (parts.find((x) =&gt; x[0] === &#x27;t&#x27;) || [])[1];
+    const v1s = parts.filter((x) =&gt; x[0] === &#x27;v1&#x27;).map((x) =&gt; x[1] || &#x27;&#x27;);
+    if (!t || Math.abs(Date.now() / 1000 - Number(t)) &gt; 300) {
+      return res.status(400).send(&#x27;bad sig&#x27;);
+    }
+    const expected = crypto
+      .createHmac(&#x27;sha256&#x27;, WEBHOOK_SECRET)
+      .update(t + &#x27;.&#x27; + req.body)
+      .digest(&#x27;hex&#x27;);
+    const ok = v1s.some(
+      (v) =&gt;
+        v.length === expected.length &amp;&amp;
+        crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(v))
+    );
+    if (!ok) return res.status(400).send(&#x27;bad sig&#x27;);
+  }
+
+  const ev = JSON.parse(req.body);
+  if (ev.type === &#x27;checkout.session.completed&#x27; &amp;&amp; ev.data.object.payment_status === &#x27;paid&#x27;) {
+    const s = ev.data.object;
+    await credit(s.metadata.country, s.amount_total, s.metadata.name, s.id, s.metadata.message);
+  }
+  res.json({ ok: 1 });
+});</code></pre>
+<p>Idempotency is the fourth check. Stripe will retry. Your handler will also get run twice if you debug carelessly. The Checkout Session id is a stable unique key. In Postgres the kit inserts with <code>ON CONFLICT (payment_id) DO NOTHING</code>. In the local JSON fallback it keeps a <code>seen</code> map of payment ids and returns early. Either way, a replay does not double-count.</p>
+<p>Store the <strong>amount in cents</strong>, not a precomputed point total. You will thank yourself the first time you change the exchange rate.</p>
+<h2 id="compute-points-at-read-time">Compute points at read time</h2>
+<p>A simple, honest formula is enough: one unit of currency becomes a fixed number of points, and a single large payment can earn a bonus tier. The kit keeps both in <code>config.js</code> and applies them when it reads donations, not when it writes them:</p>
+<pre><code class="language-js">// $1 = 100,000 points. Highest matching bonus wins.
+bonusTiers: [
+  [50000, 0.5],  // $500+ → +50%
+  [10000, 0.3],  // $100+ → +30%
+  [5000,  0.2],
+  [2000,  0.1],
+  [500,   0.05],
+],
+
+const BON = [...CFG.bonusTiers].sort((a, b) =&gt; b[0] - a[0]);
+const bonusOf = (cents) =&gt; (BON.find(([min]) =&gt; cents &gt;= min) || [0, 0])[1];
+const PTS = (cents) =&gt; Math.round((cents / 100) * CFG.pointsPerUnit * (1 + bonusOf(cents)));</code></pre>
+<p>Because the row in the database is still <code>amount_cents</code>, you can retune <code>pointsPerUnit</code> or the bonus table later and the board recalculates. If you had written <code>points</code> at payment time, a rate change would fork history into two incompatible systems.</p>
+<p>The same idea shows up in the <a href="/guides/how-to-create-a-waitlist-landing-page/">waitlist landing page</a>: referral rank is computed at read time from a <code>spotsPerReferral</code> constant, so you can change how much a referral is worth without rewriting old rows.</p>
+<h2 id="reset-the-week-in-a-real-time-zone">Reset the week in a real time zone</h2>
+<p>&quot;Reset every Monday&quot; is vague once you leave UTC. Mondays begin at different instants in Tokyo and Los Angeles, and Pacific Time also jumps an hour for daylight saving. The robust approach is:</p>
+<ul><li>Pick an IANA time zone (<code>America/Los_Angeles</code>) and a label for the UI (&quot;Pacific Time&quot;).</li><li>Format &quot;now&quot; in that zone, find the Monday of that week, and convert that Monday 00:00 back to a UTC instant, adjusting for the zone offset (including DST).</li><li>Store a <code>week_key</code> such as <code>2026-11-16</code> (the Monday date).</li><li>The public board filters donations whose timestamp falls in <code>[start, end)</code>. An all-time tab skips the filter.</li><li>When a week ends, finalize the winner <strong>once</strong> (a unique <code>week_key</code> in a <code>weekly_champions</code> table) so a delayed webhook or a double cron cannot crown two champions.</li></ul>
+<p>Ties should be explicit. A fair default is: more points win, and if points are equal, the entry that reached that total first stays ahead.</p>
+<h2 id="keep-branding-in-one-file">Keep branding in one file</h2>
+<p>If you want other people — or your future self — to launch a new board without hunting through templates, put the marketing knobs in one module and keep secrets out of it. The kit&#x27;s <code>config.js</code> is the whole rebrand surface:</p>
+<pre><code class="language-js">module.exports = {
+  siteName: &#x27;The Richest Country in the World&#x27;,
+  shortName: &#x27;Richest Country&#x27;,
+  tagline: &#x27;Push your country to #1!&#x27;,
+  currency: &#x27;usd&#x27;,
+  minAmount: 2,              // smallest single payment
+  pointsPerUnit: 100000,     // points per 1.00 of currency
+  timeZone: &#x27;America/Los_Angeles&#x27;,
+  timeZoneLabel: &#x27;Pacific Time&#x27;,
+  theme: {
+    accent: &#x27;#ffd700&#x27;,
+    accent2: &#x27;#ff9a00&#x27;,
+    bg: &#x27;#1a0b2e&#x27;,
+    bg2: &#x27;#3b1d60&#x27;,
+  },
+};</code></pre>
+<p>Stripe keys and <code>DATABASE_URL</code> stay in environment variables. Most of the fields above can also be overridden with env vars, so you can retune a live deploy without a code edit.</p>
+<p>A few product rules belong next to the branding, not in a blog post you will forget:</p>
+<ul><li>Profile links and vanity cosmetics should unlock at a payment threshold, and the server should validate the URL (https only, no credentials, length cap).</li><li>Names and messages need stripping of control characters and a hard length limit. They are displayed to everyone.</li><li>Points, titles, and cosmetics should have <strong>no cash value</strong>. Do not add cash-outs, prize draws, or anything that reads as a lottery. Say so in your terms.</li></ul>
+<h2 id="if-you-also-ship-a-minigame-still-do-not-trust-the-client">If you also ship a minigame, still do not trust the client</h2>
+<p>A free game gives people a reason to come back on days they do not pay. It is also the first thing a bored visitor will try to break from the browser console.</p>
+<p>The pattern used by the kit&#x27;s Flag Rush mode is:</p>
+<ul><li><code>POST /api/game/start</code> issues an HMAC-signed run token that already contains the start time, the chosen country, and a random nonce.</li><li><code>POST /api/game/finish</code> verifies the token with <code>timingSafeEqual</code>, then checks that the run did not finish impossibly fast or after the token expired (a 29–40 second window around a 30 second game).</li><li>Tap counts are capped, and an optional per-second array is rejected if any bucket exceeds a taps-per-second ceiling.</li><li>Each visitor has a daily run limit and a per-country point cap, reset on a published schedule.</li></ul>
+<p>The client can still lie about how many times it was tapped. The server can still refuse impossible timings and unbounded grinding. That is the same idea as the payment webhook: the browser proposes, the server decides.</p>
+<h2 id="run-it-locally-then-put-a-real-database-behind-it">Run it locally, then put a real database behind it</h2>
+<p>You should be able to demo the whole site with no accounts. Leave <code>STRIPE_SECRET_KEY</code> empty and the pay button simulates a payment, with a visible demo banner. Leave <code>DATABASE_URL</code> empty and rows go to a local JSON file. That is fine on a laptop. It is not fine in production: a host that wipes the filesystem on every deploy will erase the board.</p>
+<p>A practical production path looks like this:</p>
+<ol><li>Create a Postgres database (Neon’s free tier is enough to start). Use the <strong>pooled</strong> connection string.</li><li>Let the app create its tables on boot, or apply a <code>schema.sql</code> yourself.</li><li>Use Stripe <strong>test mode</strong> first. Forward webhooks with the Stripe CLI: <code>stripe listen --forward-to localhost:3000/webhook</code>. Put the printed <code>whsec_...</code> in <code>STRIPE_WEBHOOK_SECRET</code>.</li><li>Pay with the test card <code>4242 4242 4242 4242</code>. Confirm the board updates only after the webhook returns 200, not merely after the redirect.</li><li>Deploy a Node host (Render’s Blueprint is one option). Set <code>BASE_URL</code> to the public HTTPS URL, add a Stripe webhook endpoint at <code>/webhook</code> for <code>checkout.session.completed</code>, and copy the endpoint’s signing secret into the host.</li><li>Switch to live keys only after a test payment works end to end, and update the webhook URL to match.</li></ol>
+<p>Free web hosts often sleep after a short idle period. The first visitor then waits half a minute. That is acceptable for a personal experiment. It is a poor fit for a board you are asking people to pay into. A small always-on plan, plus a <a href="/guides/how-to-make-a-status-page/">public status page</a> on a <em>different</em> host, is the grown-up version of the same launch.</p>
+<h2 id="a-short-checklist-before-you-take-real-money">A short checklist before you take real money</h2>
+<ul><li>The success URL never writes to the database.</li><li><code>/webhook</code> rejects bad signatures, stale timestamps, and unsigned events when a Stripe key is present.</li><li><code>payment_id</code> is unique, so retries do not double-count.</li><li>Amounts are stored in cents; points are computed on read.</li><li>The weekly window uses a named time zone and an idempotent champion row.</li><li>Demo mode cannot be reached with live keys accidentally, and legal pages are edited, not shipped as &quot;Your Company.&quot;</li><li>You have a refund path and a contact address that actually works.</li></ul>
+<p>Once those are true, the leaderboard is a product, not a demo: a public ranking that moves when the money does, and stays still when the webhook comes in twice.</p>
+      
+<aside class="cta" id="get-the-kit">
+  <h2>Get this running without starting from a blank repo</h2>
+  <p>A Stripe-powered donation leaderboard with weekly resets, a hall of fame, and a free tap game. Demo mode runs with no keys. The <strong>Leaderboard Starter Kit</strong> is the production code this guide is based on — config, anti-abuse rules, and a deploy blueprint included.</p>
+  <p class="codes"><strong>50% off</strong> with code <code>FLASH50</code> (through November 19, 2026 at 11:59 PM Pacific Time) · <strong>40% off</strong> with code <code>LAUNCH40</code> (through November 30, 2026 at 11:59 PM Pacific Time)<br>List price <span class="price">$49</span>. With <code>FLASH50</code> it is <span class="price">$24.50</span>.</p>
+  <a class="btn" href="https://richestcountry.gumroad.com/l/upawia">Get the Leaderboard Starter Kit →</a>
+</aside>
+
+      <section class="related"><h2>Keep going</h2><ul><li><a href="/guides/how-to-create-a-waitlist-landing-page/">How to Create a Waitlist Landing Page</a></li><li><a href="/guides/how-to-make-a-status-page/">How to Make a Status Page</a></li></ul></section>
+    </article>
+    
+  </main>
+  <footer class="foot">
+    <div class="foot-inner">
+      <div>© 2026 Richest Country. Practical guides for shipping small web products.</div>
+      <div><a href="/">Leaderboard</a> · <a href="https://richestcountry.gumroad.com/">Gumroad store</a> · <a href="/guides/">All guides</a></div>
+    </div>
+  </footer>
+</body>
+</html>

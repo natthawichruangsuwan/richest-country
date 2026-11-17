@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>How to Create a Waitlist Landing Page — Richest Country Guides</title>
+  <meta name="description" content="Build a pre-launch waitlist that collects emails, issues a unique referral link, ranks people fairly, and survives bots, repeat signups, and a host that wipes its disk.">
+  <link rel="canonical" href="https://richest-country.onrender.com/guides/how-to-create-a-waitlist-landing-page/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Richest Country Guides">
+  <meta property="og:title" content="How to Create a Waitlist Landing Page — Richest Country Guides">
+  <meta property="og:description" content="Build a pre-launch waitlist that collects emails, issues a unique referral link, ranks people fairly, and survives bots, repeat signups, and a host that wipes its disk.">
+  <meta property="og:url" content="https://richest-country.onrender.com/guides/how-to-create-a-waitlist-landing-page/">
+  <meta property="og:image" content="https://richest-country.onrender.com/guides/assets/og-how-to-create-a-waitlist-landing-page.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="How to Create a Waitlist Landing Page — Richest Country Guides">
+  <meta name="twitter:description" content="Build a pre-launch waitlist that collects emails, issues a unique referral link, ranks people fairly, and survives bots, repeat signups, and a host that wipes its disk.">
+  <meta name="twitter:image" content="https://richest-country.onrender.com/guides/assets/og-how-to-create-a-waitlist-landing-page.png">
+  <link rel="icon" href="/guides/assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/guides/assets/styles.css">
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "How to Create a Waitlist Landing Page", "description": "Build a pre-launch waitlist that collects emails, issues a unique referral link, ranks people fairly, and survives bots, repeat signups, and a host that wipes its disk.", "datePublished": "2026-11-16", "dateModified": "2026-11-16", "inLanguage": "en", "mainEntityOfPage": "https://richest-country.onrender.com/guides/how-to-create-a-waitlist-landing-page/", "image": "https://richest-country.onrender.com/guides/assets/og-how-to-create-a-waitlist-landing-page.png", "author": {"@type": "Organization", "name": "Richest Country", "url": "https://richest-country.onrender.com/"}, "publisher": {"@type": "Organization", "name": "Richest Country", "url": "https://richestcountry.gumroad.com/"}, "keywords": "how to create a waitlist landing page, how to create a waitlist page, how to build a waitlist, how to make a waitlist landing page"}</script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/guides/">Richest Country <small>Guides</small></a>
+      <nav class="nav" aria-label="Primary">
+        <a href="/guides/">Guides</a>
+        <a href="/">Leaderboard</a>
+        <a href="https://richestcountry.gumroad.com/">Store</a>
+      </nav>
+    </div>
+  </header>
+  <main id="main">
+
+    <article class="guide-wrap guide">
+      <p class="kicker">Waitlist Launch Kit</p>
+      <h1>How to Create a Waitlist Landing Page</h1>
+      <p class="meta">Published November 16, 2026 · 1,452 words · Richest Country</p>
+      <nav class="toc" aria-label="On this page"><strong>In this guide</strong><ol><li><a href="#what-the-page-needs-and-what-to-leave-out">What the page needs (and what to leave out)</a></li><li><a href="#the-signup-request-should-be-boring-and-strict">The signup request should be boring and strict</a></li><li><a href="#rank-the-queue-at-read-time">Rank the queue at read time</a></li><li><a href="#give-yourself-an-admin-page-and-a-csv">Give yourself an admin page and a CSV</a></li><li><a href="#brand-it-from-one-file-then-deploy-it-like-it-matters">Brand it from one file, then deploy it like it matters</a></li><li><a href="#test-the-live-page-before-you-share-the-link">Test the live page before you share the link</a></li></ol></nav>
+      <p>A waitlist landing page has one job: get the right visitor to leave an email, then show them what happens next. If you are launching a product, that page is also your first growth loop — each person should leave with a unique link, and friends who join through that link should move the referrer up the queue.</p>
+<p>You can collect addresses with a Google Form in an afternoon. You cannot run a fair referral queue, a position page, or a private admin export that way. This guide covers the page itself, the signup API, the ranking math, and the boring production details that decide whether the list is still there after a deploy. The code examples are taken from a working Waitlist Launch Kit; the same design works if you build it yourself.</p>
+<h2 id="what-the-page-needs-and-what-to-leave-out">What the page needs (and what to leave out)</h2>
+<p>The first screen should answer three questions without scrolling: what is this, who is it for, and what do I get if I join. A useful default structure is:</p>
+<ol><li>A short eyebrow or date (&quot;Early access is limited&quot;, or a real month if you have one).</li><li>A headline and one supporting sentence.</li><li>A form with an email field, an optional name, and a button that says &quot;Get early access&quot; — not &quot;Submit.&quot;</li><li>One line on what you will email them about. If you will only write at launch, say so.</li><li>A short &quot;how it works&quot; section under the fold: join, share your link, move up.</li></ol>
+<p>That is enough. Cut pricing tables you have not finalized, testimonials you cannot stand behind, and countdown timers that are not tied to a real date. A single screenshot of the actual product helps more than a stock illustration. If you only have a mockup, say it is a mockup.</p>
+<p>Navigation is optional and usually harmful. Every extra link is a way to leave without joining. A privacy policy in the footer is the exception — you are collecting emails, so say how you will use them, and edit the template before you go live.</p>
+<p>On a phone, the email field and the button should be reachable without sideways scrolling. Most waitlist traffic arrives from a shared link on a small screen.</p>
+<h2 id="the-signup-request-should-be-boring-and-strict">The signup request should be boring and strict</h2>
+<p>The browser submits JSON to <code>POST /api/signup</code>. The body is small on purpose: <code>{ &quot;email&quot;, &quot;name?&quot;, &quot;ref?&quot;, &quot;website?&quot; }</code>. <code>ref</code> is the referral code from the URL (<code>?ref=ab3kxm2q</code>). <code>website</code> is not a real field. It is a hidden honeypot.</p>
+<p>A few rules keep the list clean:</p>
+<ul><li>Normalize the email (trim, lowercase) and reject anything that fails a basic pattern or is longer than 254 characters.</li><li>Cap the name at a short length. You may show first name plus last initial on a public queue (<code>Maya C.</code>); you should never show the email on the public page.</li><li>If the same email signs up again, do not insert a second row. Return the existing position page. People refresh, hit back, and double-tap the button.</li><li>If two requests race, the unique constraint on email should win, and the second request should be treated as &quot;already joined.&quot;</li><li>You cannot refer yourself. An invalid referral code is ignored, and the visitor still joins at the back of the line.</li><li>Rate-limit by IP. The kit allows eight attempts per 15 minutes and returns <code>429</code> with a clear error.</li></ul>
+<p>The honeypot deserves a special mention. Bots fill every field they see, including a hidden <code>website</code> or <code>company</code> input. The correct response is not an error. It is a <em>fake success</em> that does not store anything:</p>
+<pre><code class="language-js">app.post(&#x27;/api/signup&#x27;, async (req, res) =&gt; {
+  const ip = clientIp(req);
+  if (!rateLimit(`signup:${ip}`, 8, 15 * 60 * 1000)) {
+    return res.status(429).json({
+      error: &#x27;Too many attempts. Please try again in a few minutes.&#x27;,
+    });
+  }
+
+  const body = req.body || {};
+  // Honeypot: bots fill hidden fields. Pretend success, do not store.
+  if (String(body.website || body.company || &#x27;&#x27;).trim()) {
+    return res.json({
+      ok: true,
+      already: false,
+      position: 1,
+      referralLink: BASE_URL + &#x27;/&#x27;,
+      referral_code: &#x27;ok&#x27;,
+    });
+  }
+
+  const email = String(body.email || &#x27;&#x27;).trim().toLowerCase();
+  const name = String(body.name || &#x27;&#x27;).trim().slice(0, 80);
+  const ref = String(body.ref || &#x27;&#x27;).trim().toLowerCase();
+  // validate email, reuse an existing row, or create a new one
+});</code></pre>
+<p>Returning a realistic-looking payload stops the bot from retrying with different garbage. It also avoids teaching scrapers which field was the trap.</p>
+<p>Assign every real signup an 8-character referral code and make sure it is unique. Build the public link from <code>BASE_URL</code>, not from the request host header, so a misconfigured proxy cannot mint links on the wrong domain.</p>
+<h2 id="rank-the-queue-at-read-time">Rank the queue at read time</h2>
+<p>A fair referral queue can be a single SQL expression. Each person starts with a position equal to the order they joined (their row id, if ids are monotonic). Each confirmed friend subtracts a configurable number of spots. Ties go to whoever joined first.</p>
+<p>The kit computes that in a CTE and never writes a stored rank:</p>
+<pre><code class="language-sql">WITH counts AS (
+  SELECT s.id, s.email, s.name, s.referral_code, s.created_at,
+         COALESCE(c.n, 0) AS referral_count
+  FROM signups s
+  LEFT JOIN (
+    SELECT referred_by AS id, COUNT(*) AS n
+    FROM signups
+    WHERE referred_by IS NOT NULL
+    GROUP BY referred_by
+  ) c ON c.id = s.id
+),
+ranked AS (
+  SELECT counts.*,
+         ROW_NUMBER() OVER (
+           ORDER BY (counts.id - counts.referral_count * $1) ASC,
+                    counts.id ASC
+         ) AS position
+  FROM counts
+)
+SELECT * FROM ranked
+ORDER BY position ASC;</code></pre>
+<p><code>$1</code> is <code>spotsPerReferral</code> (default 5). Because the math happens at read time, you can change that constant later without rewriting history. The same &quot;store facts, compute scores on the way out&quot; idea is how a <a href="/guides/how-to-make-a-donation-leaderboard-with-stripe/">donation leaderboard</a> should treat payment amounts and point rates.</p>
+<p>After signup, send the visitor to a position page, not back to the form. That page should show a large position number, how many spots they have moved, their referral link, and share buttons (a copy-link control, WhatsApp, X, and the Web Share API on phones). The share text can be a template with <code>{siteName}</code>, <code>{position}</code>, and <code>{url}</code> filled in.</p>
+<p>The public landing page can show a live queue of first names. Keep it short, and keep emails out of it. If you would rather show no names at all, turn off <code>collectName</code> or stop returning names from <code>/api/queue</code>.</p>
+<h2 id="give-yourself-an-admin-page-and-a-csv">Give yourself an admin page and a CSV</h2>
+<p>You will need to see who joined, who is referring, and you will need a copy of the list that is not trapped in a dashboard. A password-protected <code>/admin</code> with a searchable table, referral counts, totals, and <code>GET /api/admin/export.csv</code> is enough for a launch.</p>
+<p>A few production notes that are easy to skip:</p>
+<ul><li>Change <code>ADMIN_PASSWORD</code> from any example value before the site is public.</li><li>Hashed IP addresses can help you debug rate-limit issues. They should not appear in the admin UI or the CSV.</li><li>The in-memory rate limiter is per process. That is fine on a single instance. If you scale to more than one, put a shared limiter in front or stay on one process.</li><li>You are responsible for consent and anti-spam rules where you operate. The privacy page in a kit is a template, not legal advice.</li></ul>
+<p>Optional hooks make the list useful on day one. A <code>SIGNUP_WEBHOOK_URL</code> can POST a small JSON payload after every new signup (<code>event</code>, <code>email</code>, <code>position</code>, <code>referralLink</code>, <code>already</code>). Welcome email through Resend or Mailgun can include the same position and link. The signup itself should succeed even if the hook or the email provider fails — log the error, do not roll back the join.</p>
+<h2 id="brand-it-from-one-file-then-deploy-it-like-it-matters">Brand it from one file, then deploy it like it matters</h2>
+<p>All of the copy and color should live in one config module so a rebrand is not a scavenger hunt:</p>
+<pre><code class="language-js">module.exports = {
+  siteName: &#x27;Northstar&#x27;,
+  headline: &#x27;Be first in line.&#x27;,
+  subheadline:
+    &#x27;Northstar is coming soon. Join the waitlist — invite friends and move up the queue.&#x27;,
+  cta: &#x27;Get early access&#x27;,
+  collectName: true,
+  spotsPerReferral: 5,
+  eyebrow: &#x27;Early access is limited&#x27;,
+  footerNote: &quot;No spam. We&#x27;ll only email you about the launch.&quot;,
+  theme: {
+    bg: &#x27;#0B0D12&#x27;,
+    accent: &#x27;#7CFFB2&#x27;,
+    accentText: &#x27;#062016&#x27;,
+    text: &#x27;#F4F1EA&#x27;,
+  },
+};</code></pre>
+<p>Locally, you should be able to start with no cloud accounts. Empty <code>DATABASE_URL</code> can fall back to SQLite. That is a development convenience. <strong>Do not use SQLite on a host with an ephemeral disk.</strong> Render, Railway, and similar platforms will wipe the filesystem on a deploy or a restart, and your waitlist will disappear. In production, set <code>DATABASE_URL</code> to a pooled Postgres string (Neon works), set <code>BASE_URL</code> to the public HTTPS origin so referral links are correct, and put a strong admin password in the environment.</p>
+<p>A typical path is: create the database, push a <em>private</em> repo (if you started from a commercial kit, the license usually forbids publishing the source), deploy with the included Blueprint or a start command of <code>npm start</code>, then join with a real address you control and sign in at <code>/admin</code>. Confirm the row is there, the referral link uses your public host, and a second signup with the same email returns the same position.</p>
+<p>Free web hosts often sleep after about 15 minutes idle. The next visitor waits 30–60 seconds. If you are actively promoting the launch, use a plan that stays awake. And host a <a href="/guides/how-to-make-a-status-page/">status page</a> somewhere else — if the waitlist and its status page share a box, an outage hides both.</p>
+<h2 id="test-the-live-page-before-you-share-the-link">Test the live page before you share the link</h2>
+<p>Walk through the flow as a subscriber, not as the person who built it:</p>
+<ul><li>Empty email and a malformed address both show a clear error.</li><li>A good signup lands on the position page, and the welcome email (if you enabled it) actually arrives — check spam and promotions too.</li><li>The same email again does not create a second row or send a second &quot;welcome, you are new&quot; message.</li><li>A referral link increments the referrer’s count and moves their position by <code>spotsPerReferral</code>.</li><li>A self-referral or a garbage <code>ref</code> still creates a valid signup at the back.</li><li>The hidden honeypot field, if filled, does not appear in admin or the CSV.</li><li><code>/admin</code> rejects a wrong password and exports a CSV that opens in a spreadsheet.</li><li>The form is usable on a phone.</li></ul>
+<p>Once that list is green, the page is doing its job: one honest offer, one form, a queue people can climb, and a list you can still export after the host restarts.</p>
+      
+<aside class="cta" id="get-the-kit">
+  <h2>Get this running without starting from a blank repo</h2>
+  <p>A pre-launch landing page with a referral queue, position page, admin dashboard, and CSV export. The <strong>Waitlist Launch Kit</strong> is the production code this guide is based on — config, anti-abuse rules, and a deploy blueprint included.</p>
+  <p class="codes"><strong>50% off</strong> with code <code>FLASH50</code> (through November 19, 2026 at 11:59 PM Pacific Time) · <strong>40% off</strong> with code <code>LAUNCH40</code> (through November 30, 2026 at 11:59 PM Pacific Time)<br>List price <span class="price">$39</span>. With <code>FLASH50</code> it is <span class="price">$19.50</span>.</p>
+  <a class="btn" href="https://richestcountry.gumroad.com/l/wzzehp">Get the Waitlist Launch Kit →</a>
+</aside>
+
+      <section class="related"><h2>Keep going</h2><ul><li><a href="/guides/how-to-make-a-donation-leaderboard-with-stripe/">How to Make a Donation Leaderboard with Stripe</a></li><li><a href="/guides/how-to-make-a-status-page/">How to Make a Status Page</a></li></ul></section>
+    </article>
+    
+  </main>
+  <footer class="foot">
+    <div class="foot-inner">
+      <div>© 2026 Richest Country. Practical guides for shipping small web products.</div>
+      <div><a href="/">Leaderboard</a> · <a href="https://richestcountry.gumroad.com/">Gumroad store</a> · <a href="/guides/">All guides</a></div>
+    </div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://richest-country.onrender.com/sitemap.xml
