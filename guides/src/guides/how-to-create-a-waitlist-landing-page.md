@@ -12,6 +12,7 @@ queries:
 related:
   - how-to-make-a-donation-leaderboard-with-stripe
   - how-to-make-a-status-page
+  - how-to-add-testimonials-to-a-website
 ---
 
 A waitlist landing page has one job: get the right visitor to leave an email, then show them what happens next. If you are launching a product, that page is also your first growth loop — each person should leave with a unique link, and friends who join through that link should move the referrer up the queue.
@@ -28,7 +29,7 @@ The first screen should answer three questions without scrolling: what is this, 
 4. One line on what you will email them about. If you will only write at launch, say so.
 5. A short "how it works" section under the fold: join, share your link, move up.
 
-That is enough. Cut pricing tables you have not finalized, testimonials you cannot stand behind, and countdown timers that are not tied to a real date. A single screenshot of the actual product helps more than a stock illustration. If you only have a mockup, say it is a mockup.
+That is enough. Cut pricing tables you have not finalized, and countdown timers that are not tied to a real date. Skip testimonials you cannot stand behind. When a real client has agreed to be quoted, collect and approve those quotes on [a self-hosted testimonial wall](/guides/how-to-add-testimonials-to-a-website/) instead of pasting them into the hero. A single screenshot of the actual product helps more than a stock illustration. If you only have a mockup, say it is a mockup.
 
 Navigation is optional and usually harmful. Every extra link is a way to leave without joining. A privacy policy in the footer is the exception — you are collecting emails, so say how you will use them, and edit the template before you go live.
 

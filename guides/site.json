@@ -45,6 +45,12 @@
       "price": 39,
       "url": "https://richestcountry.gumroad.com/l/yiutjv",
       "blurb": "A self-hosted form backend for static sites: spam filtering, an inbox dashboard, email notifications, webhooks and CSV export. Node + SQLite, demo mode with no keys."
+    },
+    "testimonial": {
+      "name": "Testimonial Wall Kit",
+      "price": 39,
+      "url": "https://richestcountry.gumroad.com/l/onewsw",
+      "blurb": "A self-hosted testimonial collector: submit form, moderation dashboard, Wall of Love page and a one-line embed widget. Node + SQLite, demo mode with no keys."
     }
   }
 }
