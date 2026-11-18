@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>How to Add Testimonials to Your Website (Self-Hosted Wall of Love + Embed Widget) — Richest Country Guides</title>
+  <meta name="description" content="Add testimonials to a website with a self-hosted form, moderation, a Wall of Love, and a one-line script or iframe embed.">
+  <link rel="canonical" href="https://richest-country.onrender.com/guides/how-to-add-testimonials-to-a-website/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Richest Country Guides">
+  <meta property="og:title" content="How to Add Testimonials to Your Website (Self-Hosted Wall of Love + Embed Widget) — Richest Country Guides">
+  <meta property="og:description" content="Add testimonials to a website with a self-hosted form, moderation, a Wall of Love, and a one-line script or iframe embed.">
+  <meta property="og:url" content="https://richest-country.onrender.com/guides/how-to-add-testimonials-to-a-website/">
+  <meta property="og:image" content="https://richest-country.onrender.com/guides/assets/og-how-to-add-testimonials-to-a-website.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="How to Add Testimonials to Your Website (Self-Hosted Wall of Love + Embed Widget) — Richest Country Guides">
+  <meta name="twitter:description" content="Add testimonials to a website with a self-hosted form, moderation, a Wall of Love, and a one-line script or iframe embed.">
+  <meta name="twitter:image" content="https://richest-country.onrender.com/guides/assets/og-how-to-add-testimonials-to-a-website.png">
+  <link rel="icon" href="/guides/assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/guides/assets/styles.css">
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "How to Add Testimonials to Your Website (Self-Hosted Wall of Love + Embed Widget)", "description": "Add testimonials to a website with a self-hosted form, moderation, a Wall of Love, and a one-line script or iframe embed.", "datePublished": "2026-11-18", "dateModified": "2026-11-18", "inLanguage": "en", "mainEntityOfPage": "https://richest-country.onrender.com/guides/how-to-add-testimonials-to-a-website/", "image": "https://richest-country.onrender.com/guides/assets/og-how-to-add-testimonials-to-a-website.png", "author": {"@type": "Organization", "name": "Richest Country", "url": "https://richest-country.onrender.com/"}, "publisher": {"@type": "Organization", "name": "Richest Country", "url": "https://richestcountry.gumroad.com/"}, "keywords": "how to add testimonials to website, how to add testimonials to a website, how to embed testimonials on a website, how to make a wall of love"}</script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/guides/">Richest Country <small>Guides</small></a>
+      <nav class="nav" aria-label="Primary">
+        <a href="/guides/">Guides</a>
+        <a href="/">Leaderboard</a>
+        <a href="https://richestcountry.gumroad.com/">Store</a>
+      </nav>
+    </div>
+  </header>
+  <main id="main">
+
+    <article class="guide-wrap guide">
+      <p class="kicker">Testimonial Wall Kit</p>
+      <h1>How to Add Testimonials to Your Website (Self-Hosted Wall of Love + Embed Widget)</h1>
+      <p class="meta">Published November 18, 2026 · 1,978 words · Richest Country</p>
+      <nav class="toc" aria-label="On this page"><strong>In this guide</strong><ol><li><a href="#why-the-quote-has-to-be-a-real-one">Why the quote has to be a real one</a></li><li><a href="#three-ways-to-put-quotes-on-a-site">Three ways to put quotes on a site</a></li><li><a href="#what-the-form-collects">What the form collects</a></li><li><a href="#save-it-as-pending">Save it as pending</a></li><li><a href="#moderate-from-the-dashboard">Moderate from the dashboard</a></li><li><a href="#embed-the-widget-on-your-site">Embed the widget on your site</a></li><li><a href="#one-config-file-one-database">One config file, one database</a></li><li><a href="#deploy-it-then-try-the-real-flow">Deploy it, then try the real flow</a></li><li><a href="#faq">FAQ</a></li></ol></nav>
+      <p>Adding testimonials to a website means showing quotes from real customers at the moment a visitor decides whether to trust you. HTML you typed yourself goes stale, and it leaves no record that the person agreed to be shown. A hosted widget keeps the quotes in someone else&#x27;s account. This guide is the self-hosted path: a public form, a moderation queue, a Wall of Love, and a one-line embed for a site you already have.</p>
+<p>The examples come from a Testimonial Wall Kit. It runs on Node and Express, stores rows in SQLite, and falls back to a JSON file when that Node build has no SQLite. Demo mode needs no keys. The kit sends no email, calls no webhook, and adds no captcha.</p>
+<h2 id="why-the-quote-has-to-be-a-real-one">Why the quote has to be a real one</h2>
+<p>A price and a screenshot say what the product is. A testimonial says whether it worked for someone in a similar spot. Put that next to the decision: under pricing, beside a signup, or on its own wall.</p>
+<p>A useful quote names a real person and says something specific. You should know who wrote it, you should have approved the wording, and you should be able to remove it when they ask. A form that stores consent, and a dashboard that approves a row before it is public, is what makes that possible.</p>
+<p>A private message is a different job. A <a href="/guides/how-to-add-a-contact-form-to-a-static-website/">contact form on a static website</a> delivers a note to an inbox. A testimonial is published, so it needs a review step that inbox does not have.</p>
+<h2 id="three-ways-to-put-quotes-on-a-site">Three ways to put quotes on a site</h2>
+<p><strong>Edit the HTML.</strong> A blockquote, a name, and some stars. Honest for two quotes you will never collect again. Every typo is a deploy, and the client has nowhere to submit.</p>
+<p><strong>Paste a hosted widget.</strong> You get a form, a wall, and a script tag in an afternoon. The quotes live in their database. A fair trade when you do not want a process of your own.</p>
+<p><strong>Host it yourself.</strong> A small Node process stores each submission, serves the wall, and serves the embed. The marketing site never sees the POST. The collector sits on its own host, the same split a <a href="/guides/how-to-create-a-waitlist-landing-page/">waitlist landing page</a> uses for signups. The rest of this guide is that design.</p>
+<p>Node.js 20.12 or newer is enough. Node 22.5 or later (24 if you are choosing today) includes SQLite as <code>node:sqlite</code>. Express is the only dependency. From the kit directory, <code>npm install</code> then <code>npm run demo</code> serves <code>http://localhost:3000</code> with 17 sample testimonials and a demo banner. The admin password on that laptop is <code>demo-admin</code>. Delete <code>data/</code> to start over.</p>
+<h2 id="what-the-form-collects">What the form collects</h2>
+<p><code>/submit</code> asks for a rating from 1 to 5, the quote, a name, an optional role, an optional company, an optional email, an optional photo link, and a consent checkbox. A live preview updates as they type. No photo means an initials avatar colored from the name.</p>
+<ul><li>The quote must be 20 to 1,000 characters. Both ends are configurable.</li><li>The name needs at least 2 characters. Name, role, and company stop at 80.</li><li>Email is optional. It is stored for you and omitted from the wall, the widget, and the public JSON.</li><li>A photo must be <code>https://</code> with no username or password, or a path inside the kit&#x27;s public folder.</li><li>Consent stays required. You are publishing someone&#x27;s name.</li></ul>
+<p>Control characters are stripped and line breaks in the quote are kept. Cards are built with DOM APIs, and the element helper sets <code>textContent</code>, so a script tag in a quote is text:</p>
+<pre><code class="language-js">function el(tag, cls, text) {
+  var e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text !== undefined &amp;&amp; text !== null) e.textContent = String(text);
+  return e;
+}</code></pre>
+<p>A honeypot named <code>website</code> sits off screen, out of tab order, with autocomplete off. People leave it empty. A filled honeypot gets HTTP 201 and <code>{ ok: true, status: &quot;pending&quot; }</code>, and nothing is stored.</p>
+<h2 id="save-it-as-pending">Save it as pending</h2>
+<p><code>POST /api/testimonials</code> takes <code>rating</code>, <code>text</code>, <code>name</code>, and optionally <code>role</code>, <code>company</code>, <code>email</code>, <code>avatarUrl</code>, and <code>consent: true</code>.</p>
+<pre><code class="language-js">app.post(&#x27;/api/testimonials&#x27;, async (req, res) =&gt; {
+  const body = req.body || {};
+  if (body.website) {
+    // Honeypot filled in → almost certainly a bot. Pretend it worked, store nothing.
+    return res.status(201).json({ ok: true, status: &#x27;pending&#x27; });
+  }
+  if (!submitLimit.hit(req.ip)) {
+    return res.status(429).set(&#x27;Retry-After&#x27;, String(submitLimit.retryAfter(req.ip))).json({
+      error: &#x27;rate_limited&#x27;,
+      message: &#x27;Too many submissions from this network. Please try again later.&#x27;,
+    });
+  }
+  const v = validate(body, &#x27;public&#x27;);
+  if (v.error) return res.status(400).json(v);
+  if (config.form.requireConsent &amp;&amp; body.consent !== true) {
+    return res.status(400).json({
+      error: &#x27;consent&#x27;,
+      message: &#x27;Please tick the box to allow us to show your testimonial publicly.&#x27;,
+    });
+  }
+  const auto = config.form.autoApprove &amp;&amp; v.value.rating &gt;= config.form.autoApproveMinRating;
+  const t = await db.create({
+    ...v.value,
+    consent: body.consent === true,
+    status: auto ? &#x27;approved&#x27; : &#x27;pending&#x27;,
+    source: &#x27;form&#x27;,
+    ipHash: ipHash(req.ip),
+  });
+  res.status(201).json({ ok: true, status: t.status, testimonial: publicItem(t) });
+});</code></pre>
+<p>The default limit is 5 submissions per IP per 10 minutes. Over that is <code>429</code> and the row is dropped. A bad field is <code>400</code>. Success is <code>201</code>.</p>
+<p>Automatic approval is off, so a real row is <code>pending</code> until you say otherwise. It is absent from the wall, the widget, and <code>GET /api/testimonials</code>. With automatic approval on, only a rating at or above the minimum (default 4) is published. The rest still wait.</p>
+<table><thead><tr><th>Status</th><th>Who sees it</th></tr></thead><tbody><tr><td>pending</td><td>Admin only. This is the queue.</td></tr><tr><td>approved</td><td>Wall, embed, and the public JSON API.</td></tr><tr><td>hidden</td><td>Kept, and shown nowhere public.</td></tr></tbody></table>
+<p>Featured is a flag on an approved row, not a fourth status. Featured rows sort first, which puts them on the top row of the wall and at the start of the widget. The average is the mean of approved ratings, rounded to one decimal.</p>
+<p>The public object drops the email. The IP is stored as a salted SHA-256 hash. Set a fixed salt if those hashes should survive a restart.</p>
+<pre><code class="language-js">function publicItem(t) {
+  return {
+    id: t.id,
+    name: t.name,
+    role: t.role,
+    company: t.company,
+    rating: t.rating,
+    text: t.text,
+    avatarUrl: t.avatarUrl,
+    initials: initials(t.name),
+    featured: t.featured,
+    createdAt: t.createdAt,
+  };
+}</code></pre>
+<h2 id="moderate-from-the-dashboard">Moderate from the dashboard</h2>
+<p><code>/admin</code> asks for <code>ADMIN_PASSWORD</code>. Empty means the dashboard is off and the API returns <code>503</code>. Demo mode with no password of your own uses <code>demo-admin</code>. Generate a real one before the site is public:</p>
+<pre><code class="language-bash">node -e &quot;console.log(require(&#x27;crypto&#x27;).randomBytes(18).toString(&#x27;base64url&#x27;))&quot;</code></pre>
+<p>The tab stores the password in <code>sessionStorage</code> and sends <code>Authorization: Bearer</code> plus that value. Both sides are hashed with SHA-256 and compared with <code>crypto.timingSafeEqual</code>. After 10 failures from one IP inside 10 minutes, that IP is locked out for the rest of the window.</p>
+<p>The top shows pending, live, featured, and the average. Tabs are Pending, Approved, Hidden, and All. Search matches name, role, company, email, and the quote.</p>
+<p>Approve, Hide, Feature, Edit, and Delete are on each row. Featuring a pending quote also sets it to approved, so that click publishes it. Unfeaturing leaves the status alone. Edit changes name, role, company, email, rating, text, photo link, status, and the featured flag. Delete asks first and cannot be undone.</p>
+<p><code>PATCH /api/admin/testimonials/:id</code> saves an edit. <code>DELETE /api/admin/testimonials/:id</code> removes the row. Both require the bearer token. An unknown id is <code>404</code>.</p>
+<p>CSV export includes the private email, as UTF-8 with a byte-order mark. A cell that starts with <code>=</code>, <code>+</code>, <code>-</code>, <code>@</code>, or a tab is prefixed so a spreadsheet does not treat it as a formula:</p>
+<pre><code class="language-js">function csvCell(v) {
+  let s = v === null || v === undefined ? &#x27;&#x27; : String(v);
+  if (/^[=+\-@\t\r]/.test(s)) s = `&#x27;${s}`;
+  return /[&quot;,\n\r]/.test(s) ? `&quot;${s.replace(/&quot;/g, &#x27;&quot;&quot;&#x27;)}&quot;` : s;
+}</code></pre>
+<p>The same page builds the embed. Choices are light or dark, carousel or grid, a limit from 1 to 100, a minimum of any rating, 4 and up, or 5 only, featured-only, and a link to the form. A preview sits beside the script, the iframe, and a sample <code>GET</code> URL. The snippets use <code>PUBLIC_URL</code>. Leave it empty and they point at the origin you have open, which is localhost on a laptop.</p>
+<p>Old quotes in email or a direct message still need a submission. Ask the person to use <code>/submit</code> so consent is on record, then fix wording with Edit.</p>
+<h2 id="embed-the-widget-on-your-site">Embed the widget on your site</h2>
+<p>The Wall of Love is <code>GET /</code>. It loads approved quotes, featured first, up to <code>WALL_LIMIT</code> (default 200). The header shows the average and the count while the summary is on. Theme is light, dark, or auto, and the visitor can toggle it. Cards sit in a masonry of up to three columns. Link <code>/</code> from the marketing site, a signature, or an invoice.</p>
+<p>Where the quotes should sit on that site, paste:</p>
+<pre><code class="language-html">&lt;script src=&quot;https://reviews.yourdomain.com/widget.js&quot; data-theme=&quot;light&quot; data-layout=&quot;carousel&quot; async&gt;&lt;/script&gt;</code></pre>
+<p>The script inserts an iframe to <code>/embed</code> on its own origin, after the tag, or inside <code>data-target</code>. Page CSS cannot restyle the cards, and the widget cannot read the page. Height starts at 360 pixels for a carousel and 640 for a grid, then follows the embed page. The parent accepts the height message only from the widget origin and that frame, and clamps it between 60 and 20,000 pixels.</p>
+<p>A builder that blocks scripts gets a plain iframe. It does not resize, so set the height yourself:</p>
+<pre><code class="language-html">&lt;iframe src=&quot;https://reviews.yourdomain.com/embed?theme=light&amp;layout=grid&amp;limit=6&quot;
+        style=&quot;width:100%;height:640px;border:0&quot; title=&quot;Testimonials&quot;&gt;&lt;/iframe&gt;</code></pre>
+<p>Script attributes, all optional: <code>data-theme</code> (<code>light</code> or <code>dark</code>), <code>data-layout</code> (<code>carousel</code> or <code>grid</code>), <code>data-limit</code> (1 to 100), <code>data-featured=&quot;true&quot;</code>, <code>data-min-rating</code> (1 to 5), <code>data-sort</code> (<code>featured</code>, <code>newest</code>, or <code>rating</code>), <code>data-accent</code> (hex), <code>data-bg=&quot;transparent&quot;</code>, <code>data-summary=&quot;false&quot;</code>, <code>data-cta=&quot;true&quot;</code>, <code>data-autoplay</code> (seconds; <code>0</code> is off, and playback pauses on hover and for reduced motion), and <code>data-target</code>. The iframe uses the same names as query parameters. <code>accent</code> has no hash mark. Flags are <code>featured=1</code>, <code>bg=transparent</code>, <code>summary=0</code>, and <code>cta=1</code>. The dashboard writes theme, layout, limit, minimum rating, featured, and the call to action. Add the rest by hand. Autoplay defaults to 6 seconds when the snippet omits it.</p>
+<p><code>GET /api/testimonials</code> is the same approved list as JSON: brand name, count, average, and items. <code>limit</code> is 1 to 500, default 50. <code>minRating</code>, <code>featured=1</code>, and <code>sort</code> match the widget. Emails are not included. <code>API_CORS_ORIGIN</code> defaults to any origin. The route allows 240 requests per IP per minute.</p>
+<p><code>EMBED_ALLOWED_ORIGINS</code> also defaults to any site. Set your own origins, separated by spaces, before launch. Only <code>/embed</code> may be framed. Other pages send <code>X-Frame-Options: DENY</code> and <code>frame-ancestors &#x27;none&#x27;</code>. &quot;Refused to connect&quot; means the embedding origin is missing. Add it as the address bar shows it, scheme included, no trailing slash.</p>
+<h2 id="one-config-file-one-database">One config file, one database</h2>
+<p>Environment variables override <code>config.js</code>. The form rules are the block you will change first:</p>
+<pre><code class="language-js">form: {
+  minLength: num(&#x27;TEXT_MIN_LENGTH&#x27;, 20),
+  maxLength: num(&#x27;TEXT_MAX_LENGTH&#x27;, 1000),
+  requireConsent: bool(&#x27;REQUIRE_CONSENT&#x27;, true),
+  allowAvatarUrl: bool(&#x27;ALLOW_AVATAR_URL&#x27;, true),
+  askEmail: bool(&#x27;ASK_EMAIL&#x27;, true),
+  autoApprove: bool(&#x27;AUTO_APPROVE&#x27;, false),
+  autoApproveMinRating: num(&#x27;AUTO_APPROVE_MIN_RATING&#x27;, 4),
+},</code></pre>
+<p><code>BRAND_NAME</code>, <code>BRAND_LOGO_TEXT</code>, and an optional <code>BRAND_LOGO_URL</code> (a file under <code>public/</code>, or an <code>https://</code> URL) are the header. The sample name in the file is Lumen Studio. Replace it. Wall title, form intro, consent sentence, thank-you text, and the empty-wall sentence are the <code>copy</code> object. <code>THEME_ACCENT</code>, <code>THEME_ACCENT_2</code>, <code>THEME_STAR</code>, and the two backgrounds are hex.</p>
+<p>SQLite at <code>data/testimonials.db</code> is the default. Rating must be 1 to 5. Status must be pending, approved, or hidden. If <code>node:sqlite</code> fails to load and you did not force it, the process switches to <code>data/testimonials.json</code> and logs that. <code>STORAGE=json</code> selects the file. <code>STORAGE=memory</code> is for tests and forgets every row on restart. JSON writes go to a temp file and are renamed into place.</p>
+<pre><code class="language-js">function open() {
+  const storage = String(process.env.STORAGE || &#x27;&#x27;).toLowerCase();
+  if (storage === &#x27;memory&#x27;) return { db: jsonBackend(null), label: &#x27;in-memory (resets on restart)&#x27; };
+  const jsonFile = path.resolve(process.env.JSON_PATH || path.join(__dirname, &#x27;data&#x27;, &#x27;testimonials.json&#x27;));
+  if (storage === &#x27;json&#x27;) return { db: jsonBackend(jsonFile), label: `JSON file (${rel(jsonFile)})` };
+  const sqliteFile = process.env.SQLITE_PATH === &#x27;:memory:&#x27;
+    ? &#x27;:memory:&#x27;
+    : path.resolve(process.env.SQLITE_PATH || path.join(__dirname, &#x27;data&#x27;, &#x27;testimonials.db&#x27;));
+  try {
+    return { db: sqliteBackend(sqliteFile), label: `SQLite (${sqliteFile === &#x27;:memory:&#x27; ? &#x27;in-memory&#x27; : rel(sqliteFile)})` };
+  } catch (err) {
+    if (storage === &#x27;sqlite&#x27;) throw new Error(`STORAGE=sqlite needs Node 22.5+ (node:sqlite): ${err.message}`);
+    return { db: jsonBackend(jsonFile), label: `JSON file (${rel(jsonFile)}) — node:sqlite unavailable` };
+  }
+}</code></pre>
+<p>Thousands of rows fit in the JSON file. The file still has to live on a disk that survives deploy. One install is one brand. A second brand is a second process, with its own URL, password, and database.</p>
+<h2 id="deploy-it-then-try-the-real-flow">Deploy it, then try the real flow</h2>
+<p>Copy the example env file. Set <code>ADMIN_PASSWORD</code>, <code>PUBLIC_URL</code> with no trailing slash (the process rejects a value that does not look like <code>https://reviews.yourdomain.com</code>), and <code>BRAND_NAME</code>. Behind Render, Railway, Fly, Nginx, or Cloudflare, set <code>TRUST_PROXY=true</code> so limits see the visitor. Add <code>EMBED_ALLOWED_ORIGINS</code> when the real site is known.</p>
+<p><code>npm start</code> listens on <code>PORT</code> or 3000. <code>GET /healthz</code> returns ok, demo mode, the storage label, and the row count. Watch that URL from a <a href="/guides/how-to-make-a-status-page/">status page</a> on another machine. A full disk should not take the outage notice down with it.</p>
+<p>The kit includes a Dockerfile, a Fly config, and a Render blueprint with a persistent disk. Point <code>SQLITE_PATH</code> or <code>JSON_PATH</code> at that disk. On a VPS, <code>npm ci --omit=dev</code> and <code>npm start</code> under systemd or pm2, behind HTTPS, is enough. Back up <code>data/</code>. The CSV is the other copy.</p>
+<p>Before sharing <code>/submit</code>, send a quote with a name and consent, and confirm the thank-you text says it waits for review. The wall and the widget should still omit it. Approve it, then confirm the card on both. Feature it, edit a typo, and reload. A honeypot submission should add no row. Delete the test when you are done.</p>
+<p>GitHub Pages, Netlify, and S3 only need the script or the iframe. The Node process keeps the file. Keep it awake while people are submitting, because a cold start makes the form feel broken.</p>
+<h2 id="faq">FAQ</h2>
+<h3 id="why-is-a-new-testimonial-missing-from-the-wall">Why is a new testimonial missing from the wall?</h3>
+<p>It is pending. Approve it in <code>/admin</code>. That is what stops a stranger from publishing with a POST. Automatic approval only publishes a rating at or above the cutoff, default 4.</p>
+<h3 id="can-i-add-testimonials-to-a-static-website">Can I add testimonials to a static website?</h3>
+<p>Yes. Leave the marketing site as files. The script or iframe loads the widget from the host that stores the rows. Put that origin on <code>EMBED_ALLOWED_ORIGINS</code>, or the browser refuses the frame. Use <code>GET /api/testimonials</code> when you want your own markup.</p>
+<h3 id="do-i-have-to-use-sqlite">Do I have to use SQLite?</h3>
+<p>No. Node 22.5 and newer use the built-in module. Node 20.12 through 22.4 logs that SQLite is unavailable and writes JSON instead. <code>STORAGE</code> forces either. The file has to persist across deploys either way.</p>
+<h3 id="will-i-get-an-email-when-someone-submits">Will I get an email when someone submits?</h3>
+<p>No. Check Pending, or download the CSV. The thank-you screen says the quote waits for review, or that it is already live when automatic approval published it.</p>
+<h3 id="can-one-install-collect-quotes-for-several-clients">Can one install collect quotes for several clients?</h3>
+<p>No. Brand, colors, and the database are one product. Run another copy for another brand.</p>
+      
+<aside class="cta" id="get-the-kit">
+  <h2>Get this running without starting from a blank repo</h2>
+  <p>A self-hosted testimonial collector: submit form, moderation dashboard, Wall of Love page and a one-line embed widget. Node + SQLite, demo mode with no keys. The <strong>Testimonial Wall Kit</strong> is the production code this guide is based on — config, anti-abuse rules, and a deploy blueprint included.</p>
+  <p class="codes"><strong>50% off</strong> with code <code>FLASH50</code> (through November 19, 2026 at 11:59 PM Pacific Time) · <strong>40% off</strong> with code <code>LAUNCH40</code> (through November 30, 2026 at 11:59 PM Pacific Time)<br>List price <span class="price">$39</span>. With <code>FLASH50</code> it is <span class="price">$19.50</span>.</p>
+  <a class="btn" href="https://richestcountry.gumroad.com/l/onewsw">Get the Testimonial Wall Kit →</a>
+</aside>
+
+      <section class="related"><h2>Keep going</h2><ul><li><a href="/guides/how-to-add-a-contact-form-to-a-static-website/">How to Add a Contact Form to a Static Website (Without a Backend You Have to Write)</a></li><li><a href="/guides/how-to-create-a-waitlist-landing-page/">How to Create a Waitlist Landing Page</a></li></ul></section>
+    </article>
+    
+  </main>
+  <footer class="foot">
+    <div class="foot-inner">
+      <div>© 2026 Richest Country. Practical guides for shipping small web products.</div>
+      <div><a href="/">Leaderboard</a> · <a href="https://richestcountry.gumroad.com/">Gumroad store</a> · <a href="/guides/">All guides</a></div>
+    </div>
+  </footer>
+</body>
+</html>

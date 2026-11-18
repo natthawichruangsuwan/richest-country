@@ -12,6 +12,7 @@ queries:
 related:
   - how-to-create-a-waitlist-landing-page
   - how-to-make-a-status-page
+  - how-to-add-testimonials-to-a-website
 ---
 
 A contact form for a static website is a small HTML form that has to deliver a message to you, even though the site itself is only files. GitHub Pages, a Netlify or Vercel static deploy, an S3 bucket, and a folder of plain HTML can all show the form. None of them can read the POST, store the row, or hand it to a mail server. This guide covers that limit, the usual ways around it, and a working setup: plain HTML and a `fetch()` version that both post to a self-hosted endpoint, with a honeypot, a time trap, an allowed-origin list, spam scoring, email and webhooks, and a disk that keeps the SQLite file.
@@ -101,7 +102,7 @@ An empty list allows any website, which is handy while you test from `localhost`
 
 A request with no `Origin` is accepted. curl does not send one. The check stops another site from embedding your form. A script is the spam score's problem.
 
-A [waitlist landing page](/guides/how-to-create-a-waitlist-landing-page/) that already has a signup API should keep it. This endpoint does not understand a referral code. Use it when the page is static and the job is to deliver a message.
+A [waitlist landing page](/guides/how-to-create-a-waitlist-landing-page/) that already has a signup API should keep it. This endpoint does not understand a referral code. Use it when the page is static and the job is to deliver a message. A public quote is a different job again: it has to be reviewed before anyone else can see it. Collect and publish those on [a testimonial wall](/guides/how-to-add-testimonials-to-a-website/).
 
 ## Score the spam, and keep what you catch
 
