@@ -372,11 +372,17 @@ def cta_box(product_key: str) -> str:
         code_html = "<p class=\"codes\">" + " · ".join(bits) + ("<br>" + " ".join(sale) if sale else "") + "</p>"
     else:
         code_html = f'<p class="codes">The kit is <span class="price">{fmt_money(price)}</span>.</p>'
+    lite_url = str(product.get("lite_url") or "").strip()
+    lite_line = ""
+    if lite_url:
+        lite_line = (
+            f'\n  <p class="lite"><a href="{escape(lite_url)}">Try the free Lite first</a></p>'
+        )
     return f"""
 <aside class="cta" id="get-the-kit">
   <h2>Get this running without starting from a blank repo</h2>
   <p>{escape(product["blurb"])} The <strong>{escape(product["name"])}</strong> is the production code this guide is based on — config, anti-abuse rules, and a deploy blueprint included.</p>
-  {code_html}
+  {code_html}{lite_line}
   <a class="btn" href="{escape(product["url"])}">Get the {escape(product["name"])} →</a>
 </aside>
 """
