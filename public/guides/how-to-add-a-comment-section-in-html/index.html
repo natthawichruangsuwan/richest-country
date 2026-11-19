@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>How to Add a Comment Section in HTML (Self-Hosted, No Disqus) — Richest Country Guides</title>
+  <meta name="description" content="Add a comment section in HTML on a static site with a self-hosted Node and SQLite widget, moderation, and spam checks.">
+  <link rel="canonical" href="https://richest-country.onrender.com/guides/how-to-add-a-comment-section-in-html/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Richest Country Guides">
+  <meta property="og:title" content="How to Add a Comment Section in HTML (Self-Hosted, No Disqus) — Richest Country Guides">
+  <meta property="og:description" content="Add a comment section in HTML on a static site with a self-hosted Node and SQLite widget, moderation, and spam checks.">
+  <meta property="og:url" content="https://richest-country.onrender.com/guides/how-to-add-a-comment-section-in-html/">
+  <meta property="og:image" content="https://richest-country.onrender.com/guides/assets/og-how-to-add-a-comment-section-in-html.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="How to Add a Comment Section in HTML (Self-Hosted, No Disqus) — Richest Country Guides">
+  <meta name="twitter:description" content="Add a comment section in HTML on a static site with a self-hosted Node and SQLite widget, moderation, and spam checks.">
+  <meta name="twitter:image" content="https://richest-country.onrender.com/guides/assets/og-how-to-add-a-comment-section-in-html.png">
+  <link rel="icon" href="/guides/assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/guides/assets/styles.css">
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "How to Add a Comment Section in HTML (Self-Hosted, No Disqus)", "description": "Add a comment section in HTML on a static site with a self-hosted Node and SQLite widget, moderation, and spam checks.", "datePublished": "2026-11-19", "dateModified": "2026-11-19", "inLanguage": "en", "mainEntityOfPage": "https://richest-country.onrender.com/guides/how-to-add-a-comment-section-in-html/", "image": "https://richest-country.onrender.com/guides/assets/og-how-to-add-a-comment-section-in-html.png", "author": {"@type": "Organization", "name": "Richest Country", "url": "https://richest-country.onrender.com/"}, "publisher": {"@type": "Organization", "name": "Richest Country", "url": "https://richestcountry.gumroad.com/"}, "keywords": "how to add a comment section in html, add comments to static site, self hosted comment system"}</script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/guides/">Richest Country <small>Guides</small></a>
+      <nav class="nav" aria-label="Primary">
+        <a href="/guides/">Guides</a>
+        <a href="/">Leaderboard</a>
+        <a href="https://richestcountry.gumroad.com/">Store</a>
+      </nav>
+    </div>
+  </header>
+  <main id="main">
+
+    <article class="guide-wrap guide">
+      <p class="kicker">Comments Widget Kit</p>
+      <h1>How to Add a Comment Section in HTML (Self-Hosted, No Disqus)</h1>
+      <p class="meta">Published November 19, 2026 · 1,984 words · Richest Country</p>
+      <nav class="toc" aria-label="On this page"><strong>In this guide</strong><ol><li><a href="#a-file-cannot-store-a-comment">A file cannot store a comment</a></li><li><a href="#three-places-the-row-can-live">Three places the row can live</a></li><li><a href="#paste-one-script-tag">Paste one script tag</a></li><li><a href="#list-the-thread-then-accept-a-post">List the thread, then accept a post</a></li><li><a href="#escape-the-text-before-you-render-it">Escape the text before you render it</a></li><li><a href="#stop-the-obvious-spam-before-it-is-a-row">Stop the obvious spam before it is a row</a></li><li><a href="#approve-it-before-anyone-else-can-see-it">Approve it before anyone else can see it</a></li><li><a href="#put-the-database-on-a-disk-that-survives-deploy">Put the database on a disk that survives deploy</a></li><li><a href="#faq">FAQ</a></li></ol></nav>
+      <p>To add a comment section in HTML, put a form under the post and send each comment to a small server that stores it. The HTML can draw the box. It cannot remember what anyone typed. A static host returns a file and then forgets the request, so the comment has to land in a database you control, wait for approval, and come back as escaped HTML. This guide is that path: one script tag on the page, a Node process with SQLite, a honeypot and a rate limit, and a moderation flag. No Disqus account, and no comments living in someone else&#x27;s database.</p>
+<p>The code is from a Comments Widget Kit. It runs on Node.js 22.13 or newer, uses the SQLite built into Node (<code>node:sqlite</code>), and has no npm packages to download. Demo mode needs no keys.</p>
+<h2 id="a-file-cannot-store-a-comment">A file cannot store a comment</h2>
+<p>When a reader opens a post, the host looks up <code>index.html</code> and sends it. A form whose <code>action</code> is that same page comes back as the HTML again, a 404, or a 405. GitHub Pages, an S3 website endpoint, and a Netlify or Vercel static export all behave that way until you attach a function, and that function is a backend you then have to write.</p>
+<p>Saving comments inside the HTML fails for the same reason. You would redeploy for every reply, two people posting at once would overwrite each other, and a script tag in a comment would run in the next reader&#x27;s browser.</p>
+<p>The browser can already POST JSON. Leave the post where it is and point the form at a process on another origin, such as <code>https://comments.yourdomain.com</code>. That process writes a row and later returns the approved thread. A <a href="/guides/how-to-add-a-contact-form-to-a-static-website/">contact form on a static website</a> uses the same split for a private message. A comment is public, so it also needs an approval step that inbox does not.</p>
+<h2 id="three-places-the-row-can-live">Three places the row can live</h2>
+<p><strong>Paste a hosted widget.</strong> Disqus and the other hosted boxes are one script tag and an account. They store the thread and handle replies. The free tier usually adds branding, ads, or a slow third-party script, and the comments sit in their database. If the account closes, the thread goes with it. A fair trade when you want something up this afternoon and you do not care where the text lives.</p>
+<p><strong>Store the thread in a GitHub repo.</strong> giscus writes to GitHub Discussions. utterances writes to GitHub Issues. Both are free, and there is no comment server to run. Readers need a GitHub account, the issues or discussions are public, and moderation is GitHub&#x27;s. That fits a docs site whose readers already have accounts. It is a poor fit for a blog where someone should type a name and a paragraph.</p>
+<p><strong>Host it yourself.</strong> A small Node process stores each comment in one SQLite file, serves the thread, and serves the form. You approve before a stranger&#x27;s words are public. The marketing site never handles the POST. You pay for a machine that keeps the file. The rest of this guide is that design.</p>
+<p>You can try the kit with no accounts. <code>npm install</code> only checks the Node version, and <code>npm run demo</code> serves <code>http://localhost:3000</code>. Open <code>/demo.html</code> for a pretend blog and <code>/admin</code> for the queue (password <code>demo-admin</code>). The sample is a fictional food blog with three posts, replies, a few waiting comments, and some caught spam. Demo data is never loaded into a database that already holds comments.</p>
+<h2 id="paste-one-script-tag">Paste one script tag</h2>
+<p>The comments appear where the tag is. <code>data-page</code> is the id of the thread. Keep that string forever, even if the URL changes, or the comments stay on the old id.</p>
+<pre><code class="language-html">&lt;section id=&quot;comments&quot;&gt;
+  &lt;script src=&quot;https://comments.yourdomain.com/comments.js&quot;
+          data-page=&quot;/blog/my-first-post&quot;
+          data-title=&quot;My first post&quot;
+          data-theme=&quot;auto&quot;
+          async&gt;&lt;/script&gt;
+&lt;/section&gt;</code></pre>
+<p><code>data-title</code> is what the dashboard and the webhook show. <code>data-url</code> is the canonical link from the dashboard; the default is the current URL without the hash. <code>data-theme</code> is <code>light</code>, <code>dark</code>, or <code>auto</code>. <code>data-accent</code> is a hex color such as <code>#0f766e</code>. <code>data-sort</code> is <code>oldest</code> or <code>newest</code>. <code>data-target</code> is a CSS selector to render into, instead of immediately after the tag.</p>
+<p>On a blog index, a second script fills every count in one request. Approved comments only, replies included:</p>
+<pre><code class="language-html">&lt;a href=&quot;/blog/my-first-post&quot;&gt;My first post&lt;/a&gt;
+· &lt;span data-comment-count=&quot;/blog/my-first-post&quot;&gt;0 comments&lt;/span&gt;
+&lt;script src=&quot;https://comments.yourdomain.com/count.js&quot; async&gt;&lt;/script&gt;</code></pre>
+<p><code>data-zero</code>, <code>data-one</code>, and <code>data-many</code> change the wording. <code>{n}</code> in <code>data-many</code> is the number. The widget renders inside a shadow root, so the page CSS cannot restyle the cards by accident, and the widget cannot restyle the page. Theme it with variables on <code>.comments-widget</code>: <code>--cw-accent</code>, <code>--cw-surface</code>, <code>--cw-text</code>, <code>--cw-font</code>, and <code>--cw-radius</code>.</p>
+<p>Hugo, Jekyll, Eleventy, and Astro pass the post path as <code>data-page</code>. A single-page app calls <code>window.CommentsWidget.reload()</code> after navigation, or inserts the script again with the new page id.</p>
+<h2 id="list-the-thread-then-accept-a-post">List the thread, then accept a post</h2>
+<p>SQLite is one file, WAL mode, no database server. The table that matters is <code>comments</code>. Top-level rows have <code>parent_id</code> null. A reply points at a top-level comment. Status is <code>pending</code>, <code>approved</code>, or <code>spam</code>.</p>
+<pre><code class="language-sql">CREATE TABLE IF NOT EXISTS comments (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  page        TEXT    NOT NULL,
+  page_title  TEXT    NOT NULL DEFAULT &#x27;&#x27;,
+  page_url    TEXT    NOT NULL DEFAULT &#x27;&#x27;,
+  parent_id   INTEGER REFERENCES comments(id) ON DELETE CASCADE,
+  name        TEXT    NOT NULL,
+  email_hash  TEXT    NOT NULL DEFAULT &#x27;&#x27;,
+  body        TEXT    NOT NULL,
+  status      TEXT    NOT NULL DEFAULT &#x27;pending&#x27;
+              CHECK (status IN (&#x27;pending&#x27;, &#x27;approved&#x27;, &#x27;spam&#x27;)),
+  is_admin    INTEGER NOT NULL DEFAULT 0,
+  ip_hash     TEXT    NOT NULL DEFAULT &#x27;&#x27;,
+  user_agent  TEXT    NOT NULL DEFAULT &#x27;&#x27;,
+  spam_reason TEXT    NOT NULL DEFAULT &#x27;&#x27;,
+  created_at  INTEGER NOT NULL,
+  updated_at  INTEGER NOT NULL
+);</code></pre>
+<p>The email address is never stored. The column is an HMAC of the address, used for the avatar color and for the &quot;returning commenter&quot; check. The visitor IP is stored as a keyed hash too.</p>
+<p><code>GET /api/comments?page=/blog/my-first-post</code> returns only approved rows, nested one level, plus a signed form token and the widget settings. <code>sort=newest</code> reverses the top level. Replies stay in the order they were posted.</p>
+<pre><code class="language-js">function threadFor(page) {
+  const rows = store.approvedForPage(page);
+  const top = [];
+  const byId = new Map();
+  for (const r of rows) if (!r.parent_id) {
+    const pc = { ...publicComment(r), replies: [] };
+    byId.set(r.id, pc);
+    top.push(pc);
+  }
+  for (const r of rows) if (r.parent_id &amp;&amp; byId.has(r.parent_id)) {
+    byId.get(r.parent_id).replies.push(publicComment(r));
+  }
+  return { top, count: rows.filter((r) =&gt; !r.parent_id || byId.has(r.parent_id)).length };
+}</code></pre>
+<p><code>publicComment</code> sends the id, parent, name, initials, hue, author flag, rendered <code>html</code>, and time. It does not send the raw body, the email hash, or the IP hash.</p>
+<p><code>POST /api/comments</code> takes JSON: <code>page</code>, <code>name</code>, optional <code>email</code>, <code>body</code>, optional <code>parent_id</code>, optional <code>title</code> and <code>url</code>, the form <code>token</code>, and <code>website</code> (the honeypot, empty for a person). Success is <code>201</code>. A live comment returns <code>status: &quot;approved&quot;</code> and the public object. A comment that is waiting returns <code>status: &quot;pending&quot;</code>, <code>comment: null</code>, and a <code>preview</code> only the poster sees. A spam row uses that same pending answer. A missing page id is <code>400</code>. A body over 32 KB is <code>413</code>.</p>
+<p>A reply to a reply is stored on the top-level comment, so the thread stays one level deep. <code>ALLOW_REPLIES=false</code> turns replies off. The parent must be approved and on the same page. Readers cannot edit or delete their own rows. You do both from the dashboard.</p>
+<p><code>GET /api/counts?page=/a&amp;page=/b</code> returns the approved totals, up to 100 pages, cached for 30 seconds. The count script writes the number with <code>textContent</code>. <code>GET /healthz</code> is the check your host should watch.</p>
+<h2 id="escape-the-text-before-you-render-it">Escape the text before you render it</h2>
+<p>The dangerous moment is putting a stranger&#x27;s string into HTML. Do the escape first, then allow a few Markdown patterns on the already-safe text. A pasted <code>&lt;script&gt;</code> or <code>&lt;img onerror&gt;</code> stays text, because <code>&lt;</code> is already <code>&amp;lt;</code>.</p>
+<pre><code class="language-js">const esc = (s) =&gt; String(s ?? &#x27;&#x27;)
+  .replace(/&amp;/g, &#x27;&amp;amp;&#x27;)
+  .replace(/&lt;/g, &#x27;&amp;lt;&#x27;)
+  .replace(/&gt;/g, &#x27;&amp;gt;&#x27;)
+  .replace(/&quot;/g, &#x27;&amp;quot;&#x27;)
+  .replace(/&#x27;/g, &#x27;&amp;#39;&#x27;);
+
+function render(src) {
+  const text = esc(String(src ?? &#x27;&#x27;).replace(/\u0000/g, &#x27;&#x27;).replace(/\r\n?/g, &#x27;\n&#x27;)).trim();
+  if (!text) return &#x27;&#x27;;
+  const blocks = text.split(/\n{2,}/);
+  const out = [];
+  for (const block of blocks) {
+    let para = [];
+    let quote = [];
+    const flush = () =&gt; {
+      if (para.length) out.push(`&lt;p&gt;${para.map(inline).join(&#x27;&lt;br&gt;&#x27;)}&lt;/p&gt;`);
+      if (quote.length) out.push(`&lt;blockquote&gt;${quote.map(inline).join(&#x27;&lt;br&gt;&#x27;)}&lt;/blockquote&gt;`);
+      para = []; quote = [];
+    };
+    for (const line of block.split(&#x27;\n&#x27;)) {
+      if (/^&amp;gt;\s?/.test(line)) { if (para.length) flush(); quote.push(line.replace(/^&amp;gt;\s?/, &#x27;&#x27;)); }
+      else { if (quote.length) flush(); para.push(line); }
+    }
+    flush();
+  }
+  return out.join(&#x27;&#x27;);
+}</code></pre>
+<p><code>inline</code> runs after that escape. It turns bold, italic, code, strike, and links into tags. Links are only <code>http://</code> and <code>https://</code>, and each one gets <code>rel=&quot;nofollow ugc noopener noreferrer&quot;</code> plus <code>target=&quot;_blank&quot;</code>. A <code>javascript:</code> URL never becomes an href. Names never go through <code>render</code>.</p>
+<p>The widget may set <code>innerHTML</code> on the comment body, and only there, because <code>c.html</code> already went through <code>render</code>. Names go through <code>textContent</code>:</p>
+<pre><code class="language-js">function el(tag, attrs, children) {
+  var n = document.createElement(tag);
+  if (attrs) for (var k in attrs) {
+    if (!Object.prototype.hasOwnProperty.call(attrs, k) || attrs[k] === null || attrs[k] === undefined || attrs[k] === false) continue;
+    if (k === &#x27;text&#x27;) n.textContent = attrs[k];
+    else if (k === &#x27;className&#x27;) n.className = attrs[k];
+    else n.setAttribute(k, attrs[k] === true ? &#x27;&#x27; : attrs[k]);
+  }
+  (children || []).forEach(function (c) { if (c) n.appendChild(typeof c === &#x27;string&#x27; ? document.createTextNode(c) : c); });
+  return n;
+}
+
+var body = el(&#x27;div&#x27;, { className: &#x27;cw-body&#x27; });
+body.innerHTML = c.html; // escaped, then Markdown-lite, on the server
+el(&#x27;span&#x27;, { className: &#x27;cw-name&#x27;, text: c.name });</code></pre>
+<p>A blank line starts a paragraph. A line that was <code>&gt; quote</code> is a blockquote, matched after escaping as <code>&amp;gt;</code>. That is the whole formatter.</p>
+<h2 id="stop-the-obvious-spam-before-it-is-a-row">Stop the obvious spam before it is a row</h2>
+<p>The checks run in order. A failure answers with <code>{ error, code }</code> and, except for a blocked word, stores nothing.</p>
+<p>The honeypot is a field named <code>website</code> (or <code>url_hp</code>). The widget puts it off screen, out of tab order, with autocomplete off. People leave it empty. A filled honeypot increments a &quot;bots blocked&quot; counter and returns <code>400</code> with code <code>SPAM</code>.</p>
+<p>The rate limit is in memory, per visitor, per 10 minutes. The default is 5 (<code>COMMENT_RATE_LIMIT</code>). Over that is <code>429</code> and <code>RATE_LIMIT</code>.</p>
+<pre><code class="language-js">function limited(key, max, windowMs) {
+  const t = now();
+  let b = buckets.get(key);
+  if (!b || t - b.start &gt;= windowMs) { b = { start: t, n: 0 }; buckets.set(key, b); }
+  b.n += 1;
+  return b.n &gt; max;
+}
+
+// inside postComment:
+if (clean(body.website ?? body.url_hp ?? &#x27;&#x27;, 50)) {
+  store.bump(&#x27;blocked_total&#x27;);
+  throw new HttpError(400, &#x27;Your comment could not be posted.&#x27;, &#x27;SPAM&#x27;);
+}
+if (limited(`c:${ipHash}`, C.rateLimit, 10 * MIN)) {
+  throw new HttpError(429, &#x27;You are commenting too fast. Please wait a few minutes.&#x27;, &#x27;RATE_LIMIT&#x27;);
+}</code></pre>
+<p>The form also carries a signed token from the GET, bound to the page: the open time in base 36, a dot, and an HMAC of that time plus the page id. <code>MIN_SUBMIT_SECONDS</code> defaults to 3. Faster than that is <code>400</code> and <code>TOO_FAST</code>. A missing, forged, or two-day-old token is <code>TOKEN</code>. A bot that POSTs without loading the widget never has a valid token.</p>
+<p>More than <code>MAX_LINKS</code> links (default 2) is <code>TOO_MANY_LINKS</code>. The same text from the same visitor on the same page within 10 minutes is <code>409</code> and <code>DUPLICATE</code>. Over <code>MAX_COMMENT_LENGTH</code> characters (default 4000) is <code>TOO_LONG</code>. Shorter than 2 characters is <code>VALIDATION</code>.</p>
+<p>A phrase in <code>BLOCKED_WORDS</code> is stored as <code>spam</code> instead of refused. The default list is viagra, casino bonus, crypto giveaway, payday loan, and seo services. The poster is told the comment is awaiting approval. <strong>Not spam</strong> in the dashboard rescues the row. Set <code>TRUST_PROXY=true</code> behind a proxy, or every visitor shares one address and the rate limit locks the site. <code>ALLOWED_ORIGINS</code> is the CORS list. Leave <code>*</code> on localhost, then set the real origins, including a <code>github.io</code> or <code>pages.dev</code> host.</p>
+<h2 id="approve-it-before-anyone-else-can-see-it">Approve it before anyone else can see it</h2>
+<p>Nothing is public until you say so, unless you change the mode. The default is <code>manual</code>: a clean comment is <code>pending</code>. It is absent from the GET, the counts, and everyone else&#x27;s widget. The poster still sees their own preview, labeled awaiting approval.</p>
+<pre><code class="language-js">const word = blockedWords.find((w) =&gt; lower.includes(w));
+let status = &#x27;pending&#x27;;
+let reason = &#x27;&#x27;;
+if (word) { status = &#x27;spam&#x27;; reason = `blocked word: ${word}`; }
+else if (settings.moderation === &#x27;auto&#x27;) status = &#x27;approved&#x27;;
+else if (settings.moderation === &#x27;known&#x27;) status = store.isKnown(emailHash) ? &#x27;approved&#x27; : &#x27;pending&#x27;;</code></pre>
+<table><thead><tr><th>Mode</th><th>What a clean comment does</th></tr></thead><tbody><tr><td>manual</td><td>Waits in Pending. This is the default.</td></tr><tr><td>known</td><td>Publishes if this email hash already has an approved comment. Everyone else waits.</td></tr><tr><td>auto</td><td>Publishes as soon as the spam checks pass.</td></tr></tbody></table>
+<p><code>known</code> uses the email hash. The address is never shown. With <code>REQUIRE_EMAIL=false</code>, a name-only comment always waits in that mode.</p>
+<p><code>/admin</code> asks for <code>ADMIN_PASSWORD</code>. No password and no <code>ADMIN_PASSWORD_HASH</code> means login returns <code>503</code>. The queue opens on Pending. Approve, Spam, Reply, and Delete work per row or in bulk. Delete removes the replies. A dashboard reply uses <code>ADMIN_DISPLAY_NAME</code> (default <code>Author</code>), shows an Author badge, and approves the pending parent. Closing threads keeps old comments visible and makes a POST return <code>403</code> <code>CLOSED</code>.</p>
+<p>A comment that is not spam can POST to <code>WEBHOOK_URL</code> as JSON, Slack, or Discord. A signed JSON body uses <code>X-Comments-Signature</code>. A failed webhook does not block the post, and the kit sends no email. The widget sets no cookie.</p>
+<p>A <a href="/guides/how-to-add-testimonials-to-a-website/">testimonial wall</a> publishes a quote you asked for. A comment section publishes a thread under one post.</p>
+<h2 id="put-the-database-on-a-disk-that-survives-deploy">Put the database on a disk that survives deploy</h2>
+<p>SQLite is one file, plus a <code>-wal</code> file while the process runs. A host that replaces the filesystem on deploy will throw the thread away. Use a VPS, or Render, Fly, or Railway with a disk. Point <code>DATA_PATH</code> at that disk (default <code>data/comments.db</code>). The kit ships a Dockerfile, a Render blueprint, and a Fly config for this process. The static site does not need them.</p>
+<p>Copy <code>.env.example</code> to <code>.env</code> and set four values.</p>
+<ul><li><code>ADMIN_PASSWORD</code>: a long random string. <code>demo-admin</code> stays on your laptop.</li><li><code>PUBLIC_URL</code>: <code>https://comments.yourdomain.com</code>, with no trailing slash.</li><li><code>ALLOWED_ORIGINS</code>: the blog origins, space-separated.</li><li><code>TRUST_PROXY=true</code> when a proxy sits in front.</li></ul>
+<p><code>npm start</code> listens on <code>PORT</code> or 3000. Watch <code>GET /healthz</code> from a <a href="/guides/how-to-make-a-status-page/">status page</a> on another machine. Then paste the Install snippet under a real post, wait a few seconds, and confirm a new comment stays hidden until you approve it. A honeypot submission should add no row.</p>
+<p>GitHub Pages, Netlify, Vercel, and S3 only serve the HTML. Keep the Node process awake. Back up the database, or run <code>sqlite3 comments.db &quot;.backup backup.db&quot;</code>. One volume means one process. A second brand is a second process. Say in the privacy policy that comments store the name and the text submitted. An email is kept only as a hash.</p>
+<h2 id="faq">FAQ</h2>
+<h3 id="can-i-add-a-comment-section-with-only-html">Can I add a comment section with only HTML?</h3>
+<p>You can add the form. The comments need a server. <code>mailto:</code> opens the visitor&#x27;s mail app and never builds a thread. A hosted widget or this endpoint is what a later reader sees. The page itself stays plain HTML either way.</p>
+<h3 id="how-is-this-different-from-disqus">How is this different from Disqus?</h3>
+<p>Disqus stores the thread in their account. This kit stores it in your SQLite file and loads the script from your host. You moderate in <code>/admin</code>. You also run the process and the disk.</p>
+<h3 id="will-it-work-on-github-pages-and-other-static-hosts">Will it work on GitHub Pages and other static hosts?</h3>
+<p>Yes. Those hosts serve the post. The script and <code>count.js</code> call the comments server. Put the site&#x27;s origin in <code>ALLOWED_ORIGINS</code>, scheme included. A missing origin is why the widget says the comments could not be loaded.</p>
+<h3 id="how-does-the-comment-section-avoid-xss">How does the comment section avoid XSS?</h3>
+<p>The server HTML-escapes the whole comment, then applies a short Markdown list to that escaped string. Names and labels go through <code>textContent</code>. The widget&#x27;s only <code>innerHTML</code> write is the server-rendered <code>html</code> field. A <code>&lt;script&gt;</code> in the body is shown as text.</p>
+<h3 id="do-i-have-to-run-a-separate-database-server">Do I have to run a separate database server?</h3>
+<p>No. Comments live in one SQLite file next to the process. Node 22.13 or newer includes <code>node:sqlite</code>. The file has to sit on a disk that survives the next deploy. Set <code>DATA_PATH</code> to that path.</p>
+      
+<aside class="cta" id="get-the-kit">
+  <h2>Get this running without starting from a blank repo</h2>
+  <p>Self-hosted comments for static sites and blogs: threaded replies, a moderation dashboard, spam protection, a comment-count script and webhooks. Node + SQLite, demo mode with no keys. The <strong>Comments Widget Kit</strong> is the production code this guide is based on — config, anti-abuse rules, and a deploy blueprint included.</p>
+  <p class="codes"><strong>50% off</strong> with code <code>FLASH50</code> (through November 19, 2026 at 11:59 PM Pacific Time) · <strong>40% off</strong> with code <code>LAUNCH40</code> (through November 30, 2026 at 11:59 PM Pacific Time)<br>List price <span class="price">$39</span>. With <code>FLASH50</code> it is <span class="price">$19.50</span>.</p>
+  <a class="btn" href="https://richestcountry.gumroad.com/l/xrzjbe">Get the Comments Widget Kit →</a>
+</aside>
+
+      <section class="related"><h2>Keep going</h2><ul><li><a href="/guides/how-to-add-a-contact-form-to-a-static-website/">How to Add a Contact Form to a Static Website (Without a Backend You Have to Write)</a></li><li><a href="/guides/how-to-add-testimonials-to-a-website/">How to Add Testimonials to Your Website (Self-Hosted Wall of Love + Embed Widget)</a></li><li><a href="/guides/how-to-make-a-status-page/">How to Make a Status Page</a></li></ul></section>
+    </article>
+    
+  </main>
+  <footer class="foot">
+    <div class="foot-inner">
+      <div>© 2026 Richest Country. Practical guides for shipping small web products.</div>
+      <div><a href="/">Leaderboard</a> · <a href="https://richestcountry.gumroad.com/">Gumroad store</a> · <a href="/guides/">All guides</a></div>
+    </div>
+  </footer>
+</body>
+</html>
