@@ -24,39 +24,49 @@
   "products": {
     "leaderboard": {
       "name": "Leaderboard Starter Kit",
-      "price": 49,
+      "price": 19,
       "url": "https://richestcountry.gumroad.com/l/upawia",
       "blurb": "A Stripe-powered donation leaderboard with weekly resets, a hall of fame, and a free tap game. Demo mode runs with no keys."
     },
     "waitlist": {
       "name": "Waitlist Launch Kit",
-      "price": 39,
+      "price": 19,
       "url": "https://richestcountry.gumroad.com/l/wzzehp",
+      "lite_url": "https://richestcountry.gumroad.com/l/waitlist-lite",
       "blurb": "A pre-launch landing page with a referral queue, position page, admin dashboard, and CSV export."
     },
     "status": {
       "name": "Status Page Kit",
-      "price": 49,
+      "price": 19,
       "url": "https://richestcountry.gumroad.com/l/cpxzcf",
+      "lite_url": "https://richestcountry.gumroad.com/l/status-page-lite",
       "blurb": "A self-hosted status page and uptime monitor with incident posts, 90-day uptime bars, badges, and RSS."
     },
     "formbox": {
       "name": "Formbox Kit",
-      "price": 39,
+      "price": 19,
       "url": "https://richestcountry.gumroad.com/l/yiutjv",
+      "lite_url": "https://richestcountry.gumroad.com/l/formbox-lite",
       "blurb": "A self-hosted form backend for static sites: spam filtering, an inbox dashboard, email notifications, webhooks and CSV export. Node + SQLite, demo mode with no keys."
     },
     "testimonial": {
       "name": "Testimonial Wall Kit",
-      "price": 39,
+      "price": 19,
       "url": "https://richestcountry.gumroad.com/l/onewsw",
+      "lite_url": "https://richestcountry.gumroad.com/l/testimonial-wall-lite",
       "blurb": "A self-hosted testimonial collector: submit form, moderation dashboard, Wall of Love page and a one-line embed widget. Node + SQLite, demo mode with no keys."
     },
     "comments": {
       "name": "Comments Widget Kit",
-      "price": 39,
+      "price": 19,
       "url": "https://richestcountry.gumroad.com/l/xrzjbe",
       "blurb": "Self-hosted comments for static sites and blogs: threaded replies, a moderation dashboard, spam protection, a comment-count script and webhooks. Node + SQLite, demo mode with no keys."
+    },
+    "bundle": {
+      "name": "Indie Dev Starter Bundle",
+      "price": 29,
+      "url": "https://richestcountry.gumroad.com/l/ebtbvd",
+      "blurb": "Five ready-made web kits: TapBlitz, Waitlist Launch Kit, Leaderboard Starter Kit, Tip Jar and Supporter Wall Kit, and Link-in-Bio Pro Kit."
     }
   }
 }

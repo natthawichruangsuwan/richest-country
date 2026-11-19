@@ -215,6 +215,9 @@ a.card:hover { border-color: var(--gold); box-shadow: 0 6px 20px rgba(28, 23, 16
   color: #f3ead8;
   padding: 0.15em 0.4em;
 }
+.cta .lite { margin: 0 0 0.95rem; }
+.cta .lite a { color: var(--gold); font-weight: 700; }
+.cta .lite a:hover { color: #fff; }
 .btn {
   display: inline-block;
   background: var(--gold);
