@@ -51,6 +51,12 @@
       "price": 39,
       "url": "https://richestcountry.gumroad.com/l/onewsw",
       "blurb": "A self-hosted testimonial collector: submit form, moderation dashboard, Wall of Love page and a one-line embed widget. Node + SQLite, demo mode with no keys."
+    },
+    "comments": {
+      "name": "Comments Widget Kit",
+      "price": 39,
+      "url": "https://richestcountry.gumroad.com/l/xrzjbe",
+      "blurb": "Self-hosted comments for static sites and blogs: threaded replies, a moderation dashboard, spam protection, a comment-count script and webhooks. Node + SQLite, demo mode with no keys."
     }
   }
 }

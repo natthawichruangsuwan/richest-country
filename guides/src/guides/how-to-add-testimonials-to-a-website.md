@@ -24,7 +24,7 @@ A price and a screenshot say what the product is. A testimonial says whether it 
 
 A useful quote names a real person and says something specific. You should know who wrote it, you should have approved the wording, and you should be able to remove it when they ask. A form that stores consent, and a dashboard that approves a row before it is public, is what makes that possible.
 
-A private message is a different job. A [contact form on a static website](/guides/how-to-add-a-contact-form-to-a-static-website/) delivers a note to an inbox. A testimonial is published, so it needs a review step that inbox does not have.
+A private message is a different job. A [contact form on a static website](/guides/how-to-add-a-contact-form-to-a-static-website/) delivers a note to an inbox. A testimonial is published, so it needs a review step that inbox does not have. A thread of replies under a post is [a comment section in HTML](/guides/how-to-add-a-comment-section-in-html/).
 
 ## Three ways to put quotes on a site
 
