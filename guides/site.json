@@ -62,6 +62,13 @@
       "url": "https://richestcountry.gumroad.com/l/xrzjbe",
       "blurb": "Self-hosted comments for static sites and blogs: threaded replies, a moderation dashboard, spam protection, a comment-count script and webhooks. Node + SQLite, demo mode with no keys."
     },
+    "shortlink": {
+      "name": "Short Link Kit",
+      "price": 19,
+      "url": "https://richestcountry.gumroad.com/l/zmizau",
+      "lite_url": "https://richestcountry.gumroad.com/l/short-link-lite",
+      "blurb": "A self-hosted URL shortener with click analytics, QR codes, custom slugs, and link rules, built on Node and SQLite, with a demo mode that needs no keys."
+    },
     "bundle": {
       "name": "Indie Dev Starter Bundle",
       "price": 29,
