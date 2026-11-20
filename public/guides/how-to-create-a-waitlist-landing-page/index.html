@@ -37,7 +37,7 @@
     <article class="guide-wrap guide">
       <p class="kicker">Waitlist Launch Kit</p>
       <h1>How to Create a Waitlist Landing Page</h1>
-      <p class="meta">Published November 16, 2026 · 1,505 words · Richest Country</p>
+      <p class="meta">Published November 16, 2026 · 1,537 words · Richest Country</p>
       <nav class="toc" aria-label="On this page"><strong>In this guide</strong><ol><li><a href="#what-the-page-needs-and-what-to-leave-out">What the page needs (and what to leave out)</a></li><li><a href="#the-signup-request-should-be-boring-and-strict">The signup request should be boring and strict</a></li><li><a href="#rank-the-queue-at-read-time">Rank the queue at read time</a></li><li><a href="#give-yourself-an-admin-page-and-a-csv">Give yourself an admin page and a CSV</a></li><li><a href="#brand-it-from-one-file-then-deploy-it-like-it-matters">Brand it from one file, then deploy it like it matters</a></li><li><a href="#test-the-live-page-before-you-share-the-link">Test the live page before you share the link</a></li></ol></nav>
       <p>A waitlist landing page has one job: get the right visitor to leave an email, then show them what happens next. If you are launching a product, that page is also your first growth loop — each person should leave with a unique link, and friends who join through that link should move the referrer up the queue.</p>
 <p>You can collect addresses with a Google Form in an afternoon. You cannot run a fair referral queue, a position page, or a private admin export that way. This guide covers the page itself, the signup API, the ranking math, and the boring production details that decide whether the list is still there after a deploy. The code examples are taken from a working Waitlist Launch Kit; the same design works if you build it yourself.</p>
@@ -78,7 +78,7 @@
   // validate email, reuse an existing row, or create a new one
 });</code></pre>
 <p>Returning a realistic-looking payload stops the bot from retrying with different garbage. It also avoids teaching scrapers which field was the trap. A <a href="/guides/how-to-add-a-contact-form-to-a-static-website/">contact form on a static website</a> uses that same fake success, then keeps the trapped message in a spam folder instead of dropping it.</p>
-<p>Assign every real signup an 8-character referral code and make sure it is unique. Build the public link from <code>BASE_URL</code>, not from the request host header, so a misconfigured proxy cannot mint links on the wrong domain.</p>
+<p>Assign every real signup an 8-character referral code and make sure it is unique. Build the public link from <code>BASE_URL</code>, not from the request host header, so a misconfigured proxy cannot mint links on the wrong domain. When that referral URL is too long for a bio, a slide, or a printed card, put a short slug in front of it with <a href="/guides/how-to-make-a-url-shortener/">a URL shortener on your own domain</a>.</p>
 <h2 id="rank-the-queue-at-read-time">Rank the queue at read time</h2>
 <p>A fair referral queue can be a single SQL expression. Each person starts with a position equal to the order they joined (their row id, if ids are monotonic). Each confirmed friend subtracts a configurable number of spots. Ties go to whoever joined first.</p>
 <p>The kit computes that in a CTE and never writes a stored rank:</p>
@@ -141,7 +141,7 @@ ORDER BY position ASC;</code></pre>
 <aside class="cta" id="get-the-kit">
   <h2>Get this running without starting from a blank repo</h2>
   <p>A pre-launch landing page with a referral queue, position page, admin dashboard, and CSV export. The <strong>Waitlist Launch Kit</strong> is the production code this guide is based on — config, anti-abuse rules, and a deploy blueprint included.</p>
-  <p class="codes"><strong>50% off</strong> with code <code>FLASH50</code> (through November 19, 2026 at 11:59 PM Pacific Time) · <strong>40% off</strong> with code <code>LAUNCH40</code> (through November 30, 2026 at 11:59 PM Pacific Time)<br>List price <span class="price">$19</span>. With <code>FLASH50</code> it is <span class="price">$9.50</span>.</p>
+  <p class="codes"><strong>40% off</strong> with code <code>LAUNCH40</code> (through November 30, 2026 at 11:59 PM Pacific Time)<br>List price <span class="price">$19</span>. With <code>LAUNCH40</code> it is <span class="price">$11.40</span>.</p>
   <p class="lite"><a href="https://richestcountry.gumroad.com/l/waitlist-lite">Try the free Lite first</a></p>
   <a class="btn" href="https://richestcountry.gumroad.com/l/wzzehp">Get the Waitlist Launch Kit →</a>
 </aside>

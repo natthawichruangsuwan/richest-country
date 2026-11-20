@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>How to Make a URL Shortener — Richest Country Guides</title>
+  <meta name="description" content="Make a URL shortener in Node.js with readable slugs, a 302 you can still change, click counts that skip bots, and no raw IP storage.">
+  <link rel="canonical" href="https://richest-country.onrender.com/guides/how-to-make-a-url-shortener/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Richest Country Guides">
+  <meta property="og:title" content="How to Make a URL Shortener — Richest Country Guides">
+  <meta property="og:description" content="Make a URL shortener in Node.js with readable slugs, a 302 you can still change, click counts that skip bots, and no raw IP storage.">
+  <meta property="og:url" content="https://richest-country.onrender.com/guides/how-to-make-a-url-shortener/">
+  <meta property="og:image" content="https://richest-country.onrender.com/guides/assets/og-how-to-make-a-url-shortener.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="How to Make a URL Shortener — Richest Country Guides">
+  <meta name="twitter:description" content="Make a URL shortener in Node.js with readable slugs, a 302 you can still change, click counts that skip bots, and no raw IP storage.">
+  <meta name="twitter:image" content="https://richest-country.onrender.com/guides/assets/og-how-to-make-a-url-shortener.png">
+  <link rel="icon" href="/guides/assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/guides/assets/styles.css">
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "How to Make a URL Shortener", "description": "Make a URL shortener in Node.js with readable slugs, a 302 you can still change, click counts that skip bots, and no raw IP storage.", "datePublished": "2026-11-20", "dateModified": "2026-11-20", "inLanguage": "en", "mainEntityOfPage": "https://richest-country.onrender.com/guides/how-to-make-a-url-shortener/", "image": "https://richest-country.onrender.com/guides/assets/og-how-to-make-a-url-shortener.png", "author": {"@type": "Organization", "name": "Richest Country", "url": "https://richest-country.onrender.com/"}, "publisher": {"@type": "Organization", "name": "Richest Country", "url": "https://richestcountry.gumroad.com/"}, "keywords": "how to make a url shortener, how to build a url shortener, how to make a url shortener for free, how to create a url shortener javascript"}</script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/guides/">Richest Country <small>Guides</small></a>
+      <nav class="nav" aria-label="Primary">
+        <a href="/guides/">Guides</a>
+        <a href="/">Leaderboard</a>
+        <a href="https://richestcountry.gumroad.com/">Store</a>
+      </nav>
+    </div>
+  </header>
+  <main id="main">
+
+    <article class="guide-wrap guide">
+      <p class="kicker">Short Link Kit</p>
+      <h1>How to Make a URL Shortener</h1>
+      <p class="meta">Published November 20, 2026 · 1,956 words · Richest Country</p>
+      <nav class="toc" aria-label="On this page"><strong>In this guide</strong><ol><li><a href="#generate-a-slug-you-can-read-aloud">Generate a slug you can read aloud</a></li><li><a href="#save-the-row-then-choose-302-or-301">Save the row, then choose 302 or 301</a></li><li><a href="#count-the-click-and-keep-the-ip-out-of-the-row">Count the click, and keep the IP out of the row</a></li><li><a href="#filter-bots-and-link-preview-crawlers">Filter bots and link-preview crawlers</a></li><li><a href="#reject-a-destination-that-should-not-be-shortened">Reject a destination that should not be shortened</a></li><li><a href="#serve-it-on-a-domain-you-own">Serve it on a domain you own</a></li><li><a href="#put-the-short-link-in-the-qr-code">Put the short link in the QR code</a></li><li><a href="#run-the-free-server-first">Run the free server first</a></li></ol></nav>
+      <p>To make a URL shortener, store a short slug beside a long address, and when someone opens the slug, redirect them and record the visit. <code>go.yourdomain.com/spring</code> opens the long page, and you can see that it happened.</p>
+<p>This is JavaScript for Node.js. A browser page can show a form and call your API, but the map of slug to destination has to live in a process you run, or the next phone has nothing to look up. The functions below come from a working shortener. The free edition is one Node file, zero packages, and a JSON file. The full edition adds SQLite, per-click analytics, bot filtering, link rules, and QR codes. Both use the same slug rules and the same kind of redirect.</p>
+<h2 id="generate-a-slug-you-can-read-aloud">Generate a slug you can read aloud</h2>
+<p>A slug is the path. Six characters is enough to read from a slide or a podcast. Mixing <code>0</code> with <code>o</code>, or <code>1</code> with <code>l</code> and <code>i</code>, turns a correct link into a 404.</p>
+<p>Drop those characters. The alphabet here is 31 symbols: <code>abcdefghjkmnpqrstuvwxyz23456789</code>. Six draws is 31^6, about 887 million combinations. The slug stays public. On the full kit, a password on the link is what keeps the destination off the redirect.</p>
+<p><code>byte % 31</code> is slightly biased, because a random byte is 0–255 and 256 is not divisible by 31. 31 times 8 is 248, so any byte at 248 or above is skipped and the rest fall evenly:</p>
+<pre><code class="language-js">const crypto = require(&#x27;crypto&#x27;);
+
+const SLUG_ALPHABET = &#x27;abcdefghjkmnpqrstuvwxyz23456789&#x27;;
+
+function randomSlug(len = 6) {
+  const n = Math.max(4, Math.min(16, Number(len) || 6));
+  const bytes = crypto.randomBytes(n * 2);
+  let s = &#x27;&#x27;;
+  for (let i = 0; s.length &lt; n; i++) {
+    const b = bytes[i % bytes.length];
+    if (b &lt; 248) s += SLUG_ALPHABET[b % 31]; // 248 = 31 * 8, so no modulo bias
+    if (i &gt; n * 8) return s.padEnd(n, &#x27;k&#x27;);
+  }
+  return s;
+}
+
+const slug = randomSlug(6);
+console.log(slug, slug.length, /^[abcdefghjkmnpqrstuvwxyz23456789]+$/.test(slug));</code></pre>
+<p>A custom slug is 1 to 64 characters: letters, numbers, dashes, and underscores, starting and ending with a letter or a number. Reserve your own paths, or a slug named <code>admin</code> or <code>qr</code> swallows the dashboard and the QR route:</p>
+<pre><code class="language-js">const SLUG_RE = /^[A-Za-z0-9](?:[A-Za-z0-9_-]{0,62}[A-Za-z0-9])?$/;
+const RESERVED = new Set([&#x27;admin&#x27;, &#x27;api&#x27;, &#x27;qr&#x27;, &#x27;healthz&#x27;, &#x27;fonts&#x27;, &#x27;robots&#x27;, &#x27;favicon&#x27;, &#x27;static&#x27;, &#x27;assets&#x27;, &#x27;login&#x27;, &#x27;logout&#x27;, &#x27;unlock&#x27;, &#x27;preview&#x27;, &#x27;theme&#x27;, &#x27;theme-config&#x27;, &#x27;sitemap&#x27;, &#x27;well-known&#x27;]);
+
+function checkSlug(slug, extraReserved = []) {
+  const s = String(slug || &#x27;&#x27;).trim();
+  if (!SLUG_RE.test(s)) return &#x27;Use 1–64 letters, numbers, dashes or underscores (start and end with a letter or number).&#x27;;
+  const low = s.toLowerCase();
+  if (RESERVED.has(low) || extraReserved.map((x) =&gt; String(x).toLowerCase()).includes(low)) return `&quot;${s}&quot; is reserved. Pick another slug.`;
+  return &#x27;&#x27;;
+}
+
+console.log(checkSlug(&#x27;spring&#x27;) || &#x27;ok&#x27;);
+console.log(checkSlug(&#x27;qr&#x27;));
+console.log(checkSlug(&#x27;spring-sale&#x27;) || &#x27;ok&#x27;);</code></pre>
+<p>Store the visible slug and a lower-case <code>slug_key</code> with a unique index. <code>/Spring</code> and <code>/spring</code> are one link. An empty field calls <code>randomSlug</code> and retries on a collision, adding a character after a run of misses. At length 6 that is rare unless the import is huge.</p>
+<h2 id="save-the-row-then-choose-302-or-301">Save the row, then choose 302 or 301</h2>
+<p>The free server keeps an array in memory and writes <code>data/links.json</code>. Creates and deletes write immediately. Clicks flush at most once a second, and again on exit. The write uses a temporary file renamed over <code>links.json</code>, so a crash leaves the previous file intact. Demo mode never touches the disk. One total per link is all that file needs to hold.</p>
+<p>A row per visit needs a table. The full kit uses SQLite through <code>node:sqlite</code> on Node 22.5 and newer, and the same API falls back to JSON when that module is missing. The database is a file either way. A host that wipes the disk on deploy wipes every short link you have already printed.</p>
+<p>The redirect reads a few columns. The real table also stores a title, tags, notes, a password hash, an expiry, a max-click cap, and separate human, unique, and bot counters. Lookup uses the lower-case key:</p>
+<pre><code class="language-js">const { DatabaseSync } = require(&#x27;node:sqlite&#x27;);
+
+const db = new DatabaseSync(&#x27;:memory:&#x27;);
+db.exec(`
+  CREATE TABLE links (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    slug TEXT NOT NULL,
+    slug_key TEXT NOT NULL,
+    url TEXT NOT NULL,
+    redirect_type INTEGER NOT NULL DEFAULT 302,
+    enabled INTEGER NOT NULL DEFAULT 1,
+    clicks INTEGER NOT NULL DEFAULT 0
+  );
+  CREATE UNIQUE INDEX links_slug_key ON links (slug_key);
+`);
+
+const insert = db.prepare(
+  &#x27;INSERT INTO links (slug, slug_key, url, redirect_type) VALUES (?, ?, ?, ?)&#x27;
+);
+insert.run(&#x27;Spring&#x27;, &#x27;spring&#x27;, &#x27;https://example.com/spring-sale&#x27;, 302);
+
+const row = db.prepare(
+  &#x27;SELECT slug, url, redirect_type, clicks FROM links WHERE slug_key = ?&#x27;
+).get(&#x27;spring&#x27;);
+console.log(row.slug, row.redirect_type, row.url);</code></pre>
+<p>Match one path segment. <code>GET</code> counts. <code>HEAD</code> redirects and leaves the counter unchanged. Unknown slugs return 404. A trailing slash is the same slug. <code>ask</code> below just fires one GET and one HEAD so you can see the result:</p>
+<pre><code class="language-js">const http = require(&#x27;http&#x27;);
+
+const links = new Map([
+  [&#x27;spring&#x27;, { url: &#x27;https://example.com/spring-sale&#x27;, clicks: 0, redirectType: 302 }],
+]);
+
+function handle(req, res) {
+  if (req.method !== &#x27;GET&#x27; &amp;&amp; req.method !== &#x27;HEAD&#x27;) {
+    res.writeHead(405, { Allow: &#x27;GET, HEAD&#x27; });
+    res.end(&#x27;Method not allowed&#x27;);
+    return;
+  }
+  let slug = &#x27;&#x27;;
+  try {
+    slug = decodeURIComponent(new URL(req.url, &#x27;http://x&#x27;).pathname.slice(1)).replace(/\/$/, &#x27;&#x27;);
+  } catch {
+    res.writeHead(404, { &#x27;Content-Type&#x27;: &#x27;text/plain; charset=utf-8&#x27; });
+    res.end(&#x27;This short link does not exist&#x27;);
+    return;
+  }
+  const link = links.get(slug.toLowerCase());
+  if (!link) {
+    res.writeHead(404, { &#x27;Content-Type&#x27;: &#x27;text/plain; charset=utf-8&#x27; });
+    res.end(&#x27;This short link does not exist&#x27;);
+    return;
+  }
+  if (req.method === &#x27;GET&#x27;) link.clicks += 1;
+  const permanent = link.redirectType === 301 || link.redirectType === 308;
+  res.writeHead(link.redirectType || 302, {
+    Location: link.url,
+    &#x27;Cache-Control&#x27;: permanent ? &#x27;public, max-age=3600&#x27; : &#x27;private, no-store&#x27;,
+    &#x27;X-Robots-Tag&#x27;: &#x27;noindex&#x27;,
+  });
+  res.end();
+}
+
+function ask(port, method, path) {
+  return new Promise((resolve) =&gt; {
+    const req = http.request({ host: &#x27;127.0.0.1&#x27;, port, method, path }, (res) =&gt; {
+      res.resume();
+      res.on(&#x27;end&#x27;, () =&gt; resolve({ status: res.statusCode, location: res.headers.location, cache: res.headers[&#x27;cache-control&#x27;] }));
+    });
+    req.end();
+  });
+}
+
+async function main() {
+  const server = http.createServer(handle);
+  await new Promise((resolve) =&gt; server.listen(0, &#x27;127.0.0.1&#x27;, resolve));
+  const { port } = server.address();
+  const got = await ask(port, &#x27;GET&#x27;, &#x27;/Spring&#x27;);
+  const head = await ask(port, &#x27;HEAD&#x27;, &#x27;/spring&#x27;);
+  console.log(&#x27;GET&#x27;, got.status, got.location, got.cache);
+  console.log(&#x27;HEAD&#x27;, head.status, &#x27;clicks&#x27;, links.get(&#x27;spring&#x27;).clicks);
+  server.close();
+}
+
+main();</code></pre>
+<p>A <strong>302</strong> is temporary. The response sends <code>Cache-Control: private, no-store</code>, so the next click comes back to your server. Change the destination, disable the link, or expire it, and the following visit sees the new answer. 302 is the default. The free server always sends it, plus <code>Referrer-Policy: unsafe-url</code>, so the destination can see <code>https://go.yourdomain.com/spring</code>. The full kit sends <code>strict-origin-when-cross-origin</code> on every response, so the destination sees the origin and the slug stays in your logs.</p>
+<p>A <strong>301</strong> is permanent. The full kit treats 301 and 308 as cacheable and sends <code>Cache-Control: public, max-age=3600</code>. A browser can reuse that hop for an hour, so the repeat visit is missing from the count. Pick 301 when the destination is finished. 307 and 308 are the method-preserving pair. A short link is a GET, so the useful choice is 302 or 301. The allowed set is 301, 302, 307, and 308.</p>
+<p>An expired link, or one that has hit its max human clicks, returns <strong>410</strong> and a plain page. A date with no time means the end of that UTC day. A disabled link returns <strong>404</strong>, the same as an unknown slug. A password-protected link shows a password page and records the click only after the password matches. The password is a scrypt hash, and the destination stays out of the HTML until the check succeeds.</p>
+<p>Copy the visitor&#x27;s query string onto the destination when that key is absent. <code>/spring?ref=sms</code> opens the long URL with <code>ref=sms</code> added, up to 30 keys. UTM tags are written on create and read back if a pasted URL already has them.</p>
+<h2 id="count-the-click-and-keep-the-ip-out-of-the-row">Count the click, and keep the IP out of the row</h2>
+<p>Hash the IP and the User-Agent with a salt you set once, and keep a prefix of the digest. That prefix is the visitor id. The same browser on the same network hashes the same way, so the second visit is a repeat and <code>is_unique</code> stays 0. A different browser or network is a new hash. Leave <code>HASH_SALT</code> alone. Changing it makes every returning visitor look new.</p>
+<pre><code class="language-js">const crypto = require(&#x27;crypto&#x27;);
+
+const hash = (v, salt) =&gt; crypto.createHash(&#x27;sha256&#x27;).update(`${salt}|${v}`).digest(&#x27;hex&#x27;).slice(0, 32);
+
+const HASH_SALT = &#x27;set-this-once-and-keep-it&#x27;;
+const ip = &#x27;203.0.113.10&#x27;;
+const ua = &#x27;Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36&#x27;;
+const visitor = hash(`${ip}|${ua}`, HASH_SALT);
+
+const row = {
+  link_id: 1,
+  visitor_hash: visitor,
+  is_unique: 1,
+  is_bot: 0,
+  referrer: &#x27;news.ycombinator.com&#x27;,
+  country: &#x27;US&#x27;,
+  device: &#x27;Desktop&#x27;,
+  browser: &#x27;Chrome&#x27;,
+  os: &#x27;macOS&#x27;,
+};
+console.log(row.visitor_hash, row.visitor_hash.length);
+console.log(&#x27;raw ip in the row:&#x27;, JSON.stringify(row).includes(ip));</code></pre>
+<p>The raw address is absent from that row and from the CSV. The export keeps the first 12 hex characters of the hash, plus time, slug, unique flag, bot flag, referrer host, country, device, browser, and OS. The rate limiter does see the IP, so one client cannot flood redirects (600 per IP per minute by default). That entry expires with the window and is never inserted into <code>clicks</code>.</p>
+<p>Country comes from a header your proxy already added (<code>CF-IPCountry</code>, or the Vercel, CloudFront, or Fastly equivalent). With no such header, the region in <code>Accept-Language</code> (<code>en-GB</code> becomes GB) is a rough guess. There is no GeoIP database and no outbound lookup. The referrer is stored as a hostname (<code>t.co</code> becomes <code>x.com</code>). Your own host counts as direct. Visitors get a short privacy note: no cookie on the click, no IP address, no third-party script. The only cookie is the admin session.</p>
+<h2 id="filter-bots-and-link-preview-crawlers">Filter bots and link-preview crawlers</h2>
+<p>Slack, Discord, iMessage, WhatsApp, Facebook, LinkedIn, and X fetch a new link to draw a preview card. Counting every <code>GET</code> shows a click before any person opens it. Crawlers, uptime checks, and <code>curl</code> do the same.</p>
+<p>The full kit classifies the request first. An empty User-Agent matches. So does <code>Purpose: prefetch</code> or <code>Sec-Purpose: preview</code>. Known preview agents match on the User-Agent:</p>
+<pre><code class="language-js">const BOT_RE = /bot\b|bot\/|crawl|spider|slurp|facebookexternalhit|facebookcatalog|meta-externalagent|embedly|quora link preview|showyoubot|outbrain|pinterest|vkshare|w3c_validator|whatsapp|telegrambot|discordbot|slackbot|slack-imgproxy|linkedinbot|twitterbot|skypeuripreview|redditbot|applebot|googlebot|bingbot|yandex|baiduspider|duckduckbot|petalbot|semrush|ahrefs|mj12bot|headlesschrome|phantomjs|lighthouse|pingdom|uptimerobot|statuscake|monitor|preview|curl\/|wget\/|python-requests|python-urllib|aiohttp|httpx|go-http-client|okhttp|java\/|libwww|axios\/|node-fetch|undici|postman|insomnia|scrapy|feedfetcher|validator|^$/i;
+
+function isBot(ua, headers = {}) {
+  const purpose = String(headers[&#x27;sec-purpose&#x27;] || headers.purpose || headers[&#x27;x-purpose&#x27;] || headers[&#x27;x-moz&#x27;] || &#x27;&#x27;).toLowerCase();
+  if (purpose.includes(&#x27;prefetch&#x27;) || purpose.includes(&#x27;preview&#x27;)) return true;
+  return BOT_RE.test(String(ua || &#x27;&#x27;).trim());
+}
+
+const browser = &#x27;Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36&#x27;;
+console.log(&#x27;browser&#x27;, isBot(browser));
+console.log(&#x27;slack&#x27;, isBot(&#x27;Slackbot-LinkExpanding 1.0 (+https://api.slack.com/robots)&#x27;));
+console.log(&#x27;empty&#x27;, isBot(&#x27;&#x27;));
+console.log(&#x27;prefetch&#x27;, isBot(browser, { purpose: &#x27;prefetch&#x27; }));</code></pre>
+<p>A bot is still redirected. The visit is stored with <code>is_bot</code> set and left out of the human total and the unique total, so the dashboard can show how many were filtered. With <code>RECORD_BOTS</code> off, the detail row is skipped and only the bot counter increments. <code>HEAD</code> never reaches this function.</p>
+<p>The free server skips this filter. Every <code>GET</code> of a real slug adds one, including a chat preview. Treat that total as requests. Use the filtered counter when the number should mean a person.</p>
+<p>Point uptime checks at <code>/healthz</code> (or <code>/health</code> on the free server). That route is JSON, and it is not a slug. A checker that hits <code>/spring</code> with a browser User-Agent will inflate the count. A <a href="/guides/how-to-make-a-status-page/">status page</a> should watch the health URL from a different machine.</p>
+<h2 id="reject-a-destination-that-should-not-be-shortened">Reject a destination that should not be shortened</h2>
+<p>Creating a link stays behind the admin password or an API key. A public paste box turns the domain into an open redirect, and both phishing pages and cloud-metadata addresses show up once that box is indexed.</p>
+<p>Check the destination on the way in, so a bad CSV row fails closed:</p>
+<pre><code class="language-js">const net = require(&#x27;net&#x27;);
+
+function isPrivateHost(host) {
+  const h = String(host || &#x27;&#x27;).toLowerCase().replace(/^\[|\]$/g, &#x27;&#x27;);
+  if (!h || h === &#x27;localhost&#x27; || h.endsWith(&#x27;.localhost&#x27;) || h.endsWith(&#x27;.local&#x27;) || h.endsWith(&#x27;.internal&#x27;) || h === &#x27;0.0.0.0&#x27;) return true;
+  if (net.isIPv4(h)) {
+    const [a, b] = h.split(&#x27;.&#x27;).map(Number);
+    return a === 10 || a === 127 || a === 0 || (a === 169 &amp;&amp; b === 254) || (a === 172 &amp;&amp; b &gt;= 16 &amp;&amp; b &lt;= 31) || (a === 192 &amp;&amp; b === 168) || (a === 100 &amp;&amp; b &gt;= 64 &amp;&amp; b &lt;= 127);
+  }
+  if (net.isIPv6(h)) return h === &#x27;::1&#x27; || h === &#x27;::&#x27; || /^f[cd]/.test(h) || /^fe[89ab]/.test(h) || h.startsWith(&#x27;::ffff:&#x27;);
+  return false;
+}
+
+const domainMatch = (host, domain) =&gt; {
+  const h = String(host || &#x27;&#x27;).toLowerCase().replace(/^www\./, &#x27;&#x27;);
+  return h === domain || h.endsWith(&#x27;.&#x27; + domain);
+};
+
+function checkDestination(input, opts = {}) {
+  let raw = String(input || &#x27;&#x27;).trim();
+  if (!raw) return { error: &#x27;url&#x27;, message: &#x27;Enter the destination URL.&#x27; };
+  if (!/^[a-z][a-z0-9+.-]*:/i.test(raw)) raw = &#x27;https://&#x27; + raw; // &quot;example.com/pricing&quot; → https://
+  if (raw.length &gt; (opts.maxLength || 4096)) return { error: &#x27;url&#x27;, message: &#x27;That URL is too long.&#x27; };
+  let u;
+  try {
+    u = new URL(raw);
+  } catch {
+    return { error: &#x27;url&#x27;, message: &#x27;That does not look like a valid URL.&#x27; };
+  }
+  if (u.protocol !== &#x27;http:&#x27; &amp;&amp; u.protocol !== &#x27;https:&#x27;) return { error: &#x27;url&#x27;, message: &#x27;Only http:// and https:// links are allowed.&#x27; };
+  if (u.username || u.password) return { error: &#x27;url&#x27;, message: &#x27;URLs with a username or password are not allowed.&#x27; };
+  const host = u.hostname.toLowerCase();
+  if (!host.includes(&#x27;.&#x27;) &amp;&amp; !net.isIP(host.replace(/^\[|\]$/g, &#x27;&#x27;)) &amp;&amp; host !== &#x27;localhost&#x27;) return { error: &#x27;url&#x27;, message: &#x27;Enter a full domain name, e.g. https://example.com/page.&#x27; };
+  for (const own of opts.ownHosts || []) {
+    if (own &amp;&amp; host === String(own).toLowerCase()) return { error: &#x27;loop&#x27;, message: &#x27;A short link cannot point to this shortener itself.&#x27; };
+  }
+  if (!opts.allowPrivate &amp;&amp; isPrivateHost(host)) return { error: &#x27;blocked&#x27;, message: &#x27;Links to private or local network addresses are not allowed.&#x27; };
+  const blockedBy = (opts.blocked || []).find((d) =&gt; d &amp;&amp; domainMatch(host, d));
+  if (blockedBy) return { error: &#x27;blocked&#x27;, message: `Links to ${blockedBy} are blocked by the link-safety list.` };
+  const allowed = (opts.allowed || []).filter(Boolean);
+  if (allowed.length &amp;&amp; !allowed.some((d) =&gt; domainMatch(host, d))) return { error: &#x27;not_allowed&#x27;, message: `Only links to ${allowed.join(&#x27;, &#x27;)} are allowed.` };
+  return { value: u.toString() };
+}
+
+const opts = { blocked: [&#x27;evil.example&#x27;], ownHosts: [&#x27;go.example.com&#x27;] };
+console.log(checkDestination(&#x27;example.com/pricing&#x27;, opts).value);
+console.log(checkDestination(&#x27;http://169.254.169.254/&#x27;, opts).error);
+console.log(checkDestination(&#x27;https://go.example.com/spring&#x27;, opts).error);
+console.log(checkDestination(&#x27;https://phish.evil.example/a&#x27;, opts).error);</code></pre>
+<p>Only <code>http</code> and <code>https</code> pass. A username or password in the URL is rejected. <code>example.com/pricing</code> is rewritten to <code>https://example.com/pricing</code>. <code>localhost</code>, link-local, and private ranges are rejected unless you allow them for a local demo. A destination on the shortener&#x27;s own host is rejected, which stops a loop. A blocklist matches the domain and its subdomains, and adding a domain there also disables links that already point at it. An allow-list, when set, means only those domains can be shortened. <code>www</code> is stripped first, so <code>example.com</code> covers <code>www.example.com</code>.</p>
+<h2 id="serve-it-on-a-domain-you-own">Serve it on a domain you own</h2>
+<p><code>https://go.yourdomain.com/spring</code> is what you publish. The path is the slug. The host is yours, so next year <code>spring</code> can point at a new page and every email, bio, and poster still works.</p>
+<p>Set <code>PUBLIC_URL</code> on the full kit, or <code>BASE_URL</code> on the free server, to that origin with no path and no trailing slash. Build copied links, CSV rows, and QR codes from that setting. Building them from the request <code>Host</code> header mints <code>localhost</code> links as soon as a proxy is wrong. A <a href="/guides/how-to-create-a-waitlist-landing-page/">waitlist landing page</a> follows the same rule for referral URLs, and a long referral link is a normal thing to put behind a slug for a slide or a card.</p>
+<p>Point DNS at the process and terminate HTTPS in front. Turn <code>TRUST_PROXY</code> on so the rate limit and the visitor hash see the caller. Send <code>/</code> to your main site with <code>HOME_URL</code> or <code>ROOT_REDIRECT</code>. Leave it empty and the bare domain shows a one-line note that it is for short links.</p>
+<p>The process has to stay awake. A host that sleeps after a short idle stretch turns every published link into a timeout. Keep the machine running, put the database on a disk that survives deploys, and back up that one file (<code>links.db</code>, or <code>links.json</code> on the free server).</p>
+<p>Cloudflare in front adds HTTPS, a layer against floods, and <code>CF-IPCountry</code> for the country column. Use Full (strict) TLS, and leave caching at the default. The 302 already says <code>Cache-Control: private, no-store</code>, so the click reaches your process.</p>
+<h2 id="put-the-short-link-in-the-qr-code">Put the short link in the QR code</h2>
+<p>Encode <code>https://go.yourdomain.com/spring</code>, the short link, so a poster stays valid when you fix a typo or move the campaign. The image is drawn on your server. There is no QR account and no call to another API.</p>
+<p><code>qr.js</code> is a byte-mode encoder for versions 1 through 40, error correction L, M, Q, and H. M is the default, about 15 percent recovery. Use Q or H when the code will be small or might get scratched. Run this from the kit folder, next to that file:</p>
+<pre><code class="language-js">const qr = require(&#x27;./qr&#x27;);
+
+const text = &#x27;https://go.example.com/spring&#x27;;
+const code = qr.encode(text, { ecc: &#x27;M&#x27; });
+const svg = qr.toSvg(code, { fg: &#x27;#111111&#x27;, bg: &#x27;#ffffff&#x27;, margin: 4 });
+console.log(text, &#x27;version&#x27;, code.version, &#x27;svg&#x27;, svg.startsWith(&#x27;&lt;svg&#x27;));</code></pre>
+<p>Active links with no password also have public images at <code>/qr/spring.svg</code> and <code>/qr/spring.png</code>. Size, colors, margin, and error correction are query parameters. A password-protected link has no public QR image, so a preview fetch cannot skip the password page. The dashboard can still draw one while you are logged in. Set <code>PUBLIC_URL</code> before you print, or the squares contain <code>localhost</code>.</p>
+<p><code>/spring+</code> shows a preview page with the title, the destination, and the QR code, and that view is not a click. Turn previews off when every visit should go straight through.</p>
+<h2 id="run-the-free-server-first">Run the free server first</h2>
+<p>The free path needs Node 18 or newer and nothing to install. From the Lite folder:</p>
+<pre><code class="language-bash">node server.js --demo</code></pre>
+<p>Open <code>/admin</code> with the password <code>demo-admin</code>. Sample links for a fictional company stay in memory. Create a slug, request it, and the total goes up by one. <code>GET /health</code> returns a small JSON body. Unknown slugs get a plain 404.</p>
+<p>For a real domain, set a long admin password and the public origin:</p>
+<pre><code class="language-bash">ADMIN_PASSWORD=&quot;a-long-random-string&quot; BASE_URL=&quot;https://go.yourdomain.com&quot; HOST=&quot;0.0.0.0&quot; node server.js</code></pre>
+<p>Put HTTPS in front, set <code>TRUST_PROXY=1</code> and <code>COOKIE_SECURE=1</code>, and keep <code>data/links.json</code>. You then have custom slugs, a 302, a total per link, a dashboard password, and reserved paths. Per-click analytics, bot filtering, a 301 option, expiry, a password on one link, a domain blocklist, and QR codes are the full kit.</p>
+<p>That kit wants Node 20.12 or newer and Express. SQLite is used when Node provides <code>node:sqlite</code>. <code>npm run demo</code> loads a fictional company and sample clicks, with no API keys. Log in at <code>/admin</code> with <code>demo-admin</code>, open <code>/spring</code> in a private window, and confirm the click is on that link&#x27;s chart.</p>
+<p>Before a real link goes out, check three things. <code>curl -I</code> shows 302, a <code>Location</code>, and <code>Cache-Control: private, no-store</code>. A browser visit moves the human count by one. Editing the destination changes where the next 302 goes. When those three hold, the shortener works. The remaining question is whether the number on the dashboard means a person.</p>
+      
+<aside class="cta" id="get-the-kit">
+  <h2>Get this running without starting from a blank repo</h2>
+  <p>A self-hosted URL shortener with click analytics, QR codes, custom slugs, and link rules, built on Node and SQLite, with a demo mode that needs no keys. The <strong>Short Link Kit</strong> is the production code this guide is based on — config, anti-abuse rules, and a deploy blueprint included.</p>
+  <p class="codes"><strong>40% off</strong> with code <code>LAUNCH40</code> (through November 30, 2026 at 11:59 PM Pacific Time)<br>List price <span class="price">$19</span>. With <code>LAUNCH40</code> it is <span class="price">$11.40</span>.</p>
+  <p class="lite"><a href="https://richestcountry.gumroad.com/l/short-link-lite">Try the free Lite first</a></p>
+  <a class="btn" href="https://richestcountry.gumroad.com/l/zmizau">Get the Short Link Kit →</a>
+</aside>
+
+      <section class="related"><h2>Keep going</h2><ul><li><a href="/guides/how-to-create-a-waitlist-landing-page/">How to Create a Waitlist Landing Page</a></li><li><a href="/guides/how-to-make-a-status-page/">How to Make a Status Page</a></li></ul></section>
+    </article>
+    
+  </main>
+  <footer class="foot">
+    <div class="foot-inner">
+      <div>© 2026 Richest Country. Practical guides for shipping small web products.</div>
+      <div><a href="/">Leaderboard</a> · <a href="https://richestcountry.gumroad.com/">Gumroad store</a> · <a href="/guides/">All guides</a></div>
+    </div>
+  </footer>
+</body>
+</html>

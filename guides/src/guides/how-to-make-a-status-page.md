@@ -150,6 +150,8 @@ The app is a single process that **serves the page and runs the checker**. If th
 - Set a long, random admin password and a stable `SESSION_SECRET` so a restart does not log everyone out.
 - Point a custom domain at it (`status.yourdomain.com`) and serve HTTPS. Render, Fly, and Railway will terminate TLS for you.
 
+Those same host rules apply when the thing people click is [a URL shortener on your own domain](/guides/how-to-make-a-url-shortener/). If `go.yourdomain.com` sleeps, or the disk that holds its database is wiped on deploy, every short link and QR code you already handed out fails together. A status page on a different machine is the public record of that outage.
+
 A two-minute local demo should exist and require no accounts. Seeded sample components, a "Demo mode" banner, and simulated checks are the right way to learn the UI. Production is the opposite: real URLs, a real password, a real public URL, and no demo banner.
 
 Before you share the link, do a short drill. Force a component into a manual outage, confirm the banner and the badge change, post an incident, resolve it, and confirm the history page keeps the timeline. Then put the component back on automatic checks. If you cannot complete that drill, users will not get a usable update during a real outage either.
